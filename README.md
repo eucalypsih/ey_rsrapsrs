@@ -717,7 +717,7 @@ Saat ADB Google memanggil `closedir`, pointer `dirp` diserahkan kembali ke Rust.
 
 
 q:
-cara membuktikan pernyataan "Fungsi Box::into&#5F;raw bertugas untuk mematikan sistem pelacakan otomatis tersebut. Kode ini menginstruksikan Rust: "Jangan sentuh atau hapus memori ini. Saya akan menyerahkan kendalinya secara manual ke bahasa C." Fungsi ini mengembalikan sebuah pointer mentah (raw pointer) bertipe `&ast;mut HookedDir`."
+cara membuktikan pernyataan "Fungsi Box::into&#x5F;raw bertugas untuk mematikan sistem pelacakan otomatis tersebut. Kode ini menginstruksikan Rust: "Jangan sentuh atau hapus memori ini. Saya akan menyerahkan kendalinya secara manual ke bahasa C." Fungsi ini mengembalikan sebuah pointer mentah (raw pointer) bertipe `&ast;mut HookedDir`."
 
 
 
