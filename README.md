@@ -686,5 +686,18 @@ Untuk mencegah malapetaka tersebut, pengembang biasanya membatasi panjang teks y
 
 
 
+q:
+`impl From<HookedDir> for *mut DIR { fn from(hd: HookedDir) -> Self { Box::into_raw(Box::new(hd)) as Self }}`
+
+a-ai:
+Potongan kode di atas adalah implementasi dari trait bawaan Rust bernama `From`. Fungsi utamanya adalah **mengubah objek `HookedDir` milik Rust menjadi pointer mentah (raw pointer) bahasa C (*mut DIR)** agar bisa diserahkan kembali ke program utama ADB bawaan Google.
+Berikut adalah penjelasan detail langkah demi langkah dari satu baris kode di dalam fungsi tersebut:
+
+1. `Box::new(hd)` (Memindahkan Data ke Memori Heap)
+Secara bawaan, objek HookedDir yang dibuat di dalam fungsi Rust akan disimpan di memori Stack. Masalahnya, data di memori Stack akan **otomatis dihapus (dihancurkan)** ketika fungsi tersebut selesai berjalan.
+
+
+
+
 <br>
 
