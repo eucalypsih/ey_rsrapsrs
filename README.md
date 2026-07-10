@@ -695,6 +695,30 @@ Berikut adalah penjelasan detail langkah demi langkah dari satu baris kode di da
 
 1. `Box::new(hd)` (Memindahkan Data ke Memori Heap)
 Secara bawaan, objek HookedDir yang dibuat di dalam fungsi Rust akan disimpan di memori Stack. Masalahnya, data di memori Stack akan **otomatis dihapus (dihancurkan)** ketika fungsi tersebut selesai berjalan.
+Agar data folder (baik yang `Native` maupun `Virtual`) tidak hilang saat fungsi berakhir, pengembang membungkusnya dengan `Box::new()`. Perintah ini memindahkan objek tersebut ke memori **Heap** (memori jangka panjang) yang tidak akan dihapus secara otomatis oleh Rust.
+
+2. `Box::into_raw(...)` (Melepas Kendali Sistem Rust)
+Rust memiliki sistem manajemen memori yang sangat ketat. Jika kita hanya menggunakan `Box`, Rust akan tetap melacaknya dan menghapusnya jika dirasa sudah tidak dipakai lagi.
+Fungsi `Box::into_raw` bertugas untuk **mematikan sistem pelacakan otomatis** tersebut. Kode ini menginstruksikan Rust: *"Jangan sentuh atau hapus memori ini. Saya akan menyerahkan kendalinya secara manual ke bahasa C."* Fungsi ini mengembalikan sebuah pointer mentah (*raw pointer*) bertipe `&ast;mut HookedDir`.
+
+3. `as Self` (Mengubah Tipe Data ke Format C)
+Kata kunci `Self` di sini merujuk pada tipe data target yang ditentukan di baris awal, yaitu `&ast;mut DIR`.
+Karena program ADB Google hanya mengerti tipe data pointer `&ast;mut DIR` (struktur folder standar bahasa C), maka pointer `&ast;mut HookedDir` buatan Rust tadi dipaksa diubah tipenya (Type Casting) menggunakan perintah `as Self`.
+
+Alur Kebalikannya: `Box::from_raw`
+Memori Heap yang sudah dilepas ke bahasa C di atas **wajib dibersihkan** jika folder sudah selesai dibaca agar tidak terjadi kebocoran RAM (*Memory Leak*).
+Jika Anda perhatikan kembali kode fungsi `termuxadb_closedir` yang Anda bagikan di awal percakapan kita, pengembang melakukan proses penarikan kembali memori tersebut menggunakan fungsi kebalikannya:
+```
+let hooked_dir = Box::from_raw(dirp as *mut HookedDir);
+
+```
+Saat ADB Google memanggil `closedir`, pointer `dirp` diserahkan kembali ke Rust. Rust mengambil alih lagi kepemilikannya menggunakan `Box::from_raw`. Begitu fungsi `closedir` selesai, Rust akan menghapus seluruh data folder tersebut dari memori Heap secara bersih dan aman.
+
+
+
+q:
+cara membuktikan pernyataan "Fungsi Box::into_raw bertugas untuk mematikan sistem pelacakan otomatis tersebut. Kode ini menginstruksikan Rust: "Jangan sentuh atau hapus memori ini. Saya akan menyerahkan kendalinya secara manual ke bahasa C." Fungsi ini mengembalikan sebuah pointer mentah (raw pointer) bertipe `&ast;mut HookedDir`."
+
 
 
 
