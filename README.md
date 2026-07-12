@@ -1488,7 +1488,7 @@ for (i, j) in self.d_name.iter_mut().zip(
     *i = *j as c_char;
 }
 
-``|
+```
 - Kode Baru (Idiomatic Rust):
 ```
 let max_len = std::cmp::min(name.as_bytes().len(), 255);
