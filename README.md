@@ -2544,7 +2544,58 @@ Berikut adalah proyek-proyek besar dan populer lainnya yang menggunakan pustaka 
 
 <br>
 
-1\. Ekosistem Dompet Kripto Fisik (Hardware Wallets)
+1\. Ekosistem Dompet Kripto Fisik (*Hardware Wallets*)
 <br>
+
+Produsen dompet kripto fisik seperti **Ledger** dan **Trezor** menggunakan basis kode Rust untuk perkakas desktop dan pustaka komunikasi mereka.
+<br>
+
+&nbsp;&nbsp;&nbsp;&nbsp;&bull; Pustaka `rusb` dipakai untuk memindai, membuka koneksi aman, dan mengirimkan data transaksi kripto terenkripsi dari komputer/HP ke perangkat USB *hardware wallet* tersebut.
+
+<br>
+
+2\. Emulator Konsol Game Modern
+<br>
+
+Beberapa proyek emulator konsol terkenal memanfaatkan `rusb` untuk fitur **USB Passthrough** (pengalihan USB langsung).
+<br>
+
+&nbsp;&nbsp;&nbsp;&nbsp;&bull; **Dolphin Emulator (Rust/C++)**: Komunitas menggunakan komponen Rust berbasis rusb untuk mendeteksi dan membaca data dari Bluetooth Adapter asli milik Nintendo Wii yang dicolokkan lewat USB PC, guna mendapatkan latensi kontroler Wiimote yang sempurna.
+<br>
+
+&nbsp;&nbsp;&nbsp;&nbsp;&bull; **RPCS3 (Sony PlayStation 3 Emulator)**: Dipakai pada sub-modul untuk mengenali aksesori USB khusus PS3 (seperti kamera *PlayStation Eye* atau mikrofon *SingStar*).
+
+<br>
+
+3\. Alat Flashing Firmware & IoT (`dfu-rs`)
+<br>
+
+&nbsp;&nbsp;&nbsp;&nbsp;&bull; Proyek `dfu-rs` menggunakan rusb untuk berinteraksi dengan mikrokontroler (seperti STM32 atau Arduino kustom) dalam mode *Device Firmware Upgrade* (DFU). Pustaka ini bertugas menghapus dan menyuntikkan file sistem operasi (*firmware binary*) baru ke papan sirkuit elektronik lewat kabel USB.
+
+<br>
+
+4\. Pengendali Radio & Drone Komunitas
+<br>
+
+&nbsp;&nbsp;&nbsp;&nbsp;&bull; **`crazyradio`**: Ini adalah pustaka driver untuk mengontrol modul radio USB *Crazyradio PA*. Pustaka ini memanfaatkan `rusb` untuk mengirimkan perintah manuver terbang secara nirkabel dari komputer ke drone mikro *Crazyflie nano quadcopter*.
+
+<br>
+
+5\. Otomatisasi Alat Ukur Laboratorium (SCPI over USB)
+<br>
+
+&nbsp;&nbsp;&nbsp;&nbsp;&bull; Di dunia teknik elektro dan riset, banyak insinyur membangun program otomatisasi uji coba menggunakan Rust. Mereka menggunakan `rusb` untuk mengirimkan perintah teks instruksi (protokol SCPI) langsung ke alat lab seperti *Oscilloscope*, *Multimeter*, atau *Signal Generator* digital murah (merek Rigol/Siglent) tanpa perlu memasang aplikasi pihak ketiga yang berat.
+
+<br>
+
+Mengapa Pustaka Ini Begitu Diminati di Luar Proyek Termux?
+<br>
+
+Alasannya adalah keamanan memori (Memory Safety) Rust. Protokol USB sangat rentan terhadap serangan manipulasi paket data biner (buffer overflow). Dengan membungkus kode C libusb menggunakan aturan ketat Rust (rusb), aplikasi-aplikasi di atas dijamin aman dari celah keamanan kebocoran memori saat membaca data mentah dari perangkat keras luar.
+
+
+
+
+
 
 <br>
