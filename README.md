@@ -5,7 +5,7 @@ Di dalam ekosistem pemrograman Rust, proyek dikelola menggunakan alat bernama **
 
 Alasan File Ini Wajib Masuk ke GitHub
 Pengembang sengaja memasukkan file `Cargo.lock` ke dalam repositori Git agar proses pembuatan program bersifat **reprodusibel (reproducible build)**. Artinya:
-<!-- -->- *Mengunci Versi*: Memastikan siapa pun (atau sistem otomatis) yang mengompilasi ulang paket `termux-adb` ini akan menggunakan versi pustaka pendukung yang sama persis seperti yang digunakan oleh `nohajc` saat memprogramnya.
+- *Mengunci Versi*: Memastikan siapa pun (atau sistem otomatis) yang mengompilasi ulang paket `termux-adb` ini akan menggunakan versi pustaka pendukung yang sama persis seperti yang digunakan oleh `nohajc` saat memprogramnya.
 - **Mencegah Error**: Menghindari kegagalan kompilasi jika di kemudian hari pustaka pihak ketiga di internet memperbarui kodenya (*breaking changes*).
 
 q-ai:
