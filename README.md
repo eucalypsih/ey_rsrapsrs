@@ -2465,7 +2465,7 @@ Pustaka [rusb (Rust USB)](https://github.com/a1ien/rusb) merupakan **salah satu 
 Selain digunakan oleh `nohajc` pada proyek `termux-adb` atau `vendor-adb-patched`, rusb dipakai secara luas oleh berbagai pengembang di seluruh dunia untuk proyek-proyek berikut:
 1. Pustaka Pengontrol Perangkat Kustom (*Hardware Drivers*)
 
-Banyak pengembang menggunakan `rusb` untuk membuat pengandar (*driver*) perangkat keras spesifik langsung menggunakan bahasa Rust:
+    Banyak pengembang menggunakan `rusb` untuk membuat pengandar (*driver*) perangkat keras spesifik langsung menggunakan bahasa Rust:
 - [crazyradio](https://crates.io/crates/crazyradio): Driver untuk perangkat *Crazyradio PA USB dongle*. Perangkat radio 2.4GHz ini digunakan untuk berkomunikasi dan mengendalikan *Crazyflie nano quadcopter* (wahana drone mikro).
 - [hidapi-rusb](https://crates.io/crates/hidapi-rusb): Sebuah variasi pustaka untuk berinteraksi dengan perangkat tipe *Human Interface Device* (seperti keyboard makro kustom, mouse gaming, atau pengontrol sirkuit) yang dibangun menggunakan basis USB dari `rusb`.
 2. Alat Flashing & Pembaruan Firmware (*DFU Tools*)
