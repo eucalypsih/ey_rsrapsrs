@@ -2464,7 +2464,7 @@ Selain digunakan oleh `nohajc` pada proyek `termux-adb` atau `vendor-adb-patched
 
 <br>
 
-1\. Pustaka Pengontrol Perangkat Kustom (*Hardware Drivers*)
+1\. Pustaka Pengontrol Perangkat Kustom (*Hardware Drivers*)\
 <br>
 Banyak pengembang menggunakan `rusb` untuk membuat pengandar (*driver*) perangkat keras spesifik langsung menggunakan bahasa Rust:\
 &nbsp;&nbsp;&nbsp;&nbsp;&bull; [crazyradio](https://crates.io/crates/crazyradio): Driver untuk perangkat *Crazyradio PA USB dongle*. Perangkat radio 2.4GHz ini digunakan untuk berkomunikasi dan mengendalikan *Crazyflie nano quadcopter* (wahana drone mikro).\
