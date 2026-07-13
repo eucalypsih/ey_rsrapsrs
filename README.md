@@ -2383,8 +2383,7 @@ fn get_termux_fd(path: &Path) -> Option<RawFd> {
 
 Fitur 2: Fitur Timeout pada Penguncian (`try_lock_for`)
 
-**Mengapa ini penting?**
-
+**Mengapa ini penting?**\
 Jika detektor *deadlock* otomatis bawaan `parking_lot` mendeteksi adanya kebuntuan, ia akan mematikan paksa aplikasi (`std::process::exit(1)`). Bagi pengguna Termux, aplikasi yang mendadak mati tanpa peringatan tentu tidak menyenangkan.
 
 **Solusinya**: Menggunakan fitur `try_lock_for` dengan batas waktu (*timeout*). Jika sebuah *thread* gagal mendapatkan kunci setelah beberapa milidetik, ia tidak akan membuat aplikasi *crash*, melainkan membatalkan operasi secara elegan atau mencoba lagi (*graceful retry*).
@@ -2462,7 +2461,8 @@ https://github.com/a1ien/rusb ini selain dipakai oleh nohajc
 a-ai:
 Pustaka [rusb (Rust USB)](https://github.com/a1ien/rusb) merupakan **salah satu standar emas (de facto)** di ekosistem Rust untuk berinteraksi dengan perangkat keras USB. Pustaka ini sangat populer karena membungkus pustaka sistem bahasa C `libusb` menjadi kode yang aman khas Rust (`safe wrapper`).
 
-Selain digunakan oleh `nohajc` pada proyek `termux-adb` atau `vendor-adb-patched`, rusb dipakai secara luas oleh berbagai pengembang di seluruh dunia untuk proyek-proyek berikut:\
+Selain digunakan oleh `nohajc` pada proyek `termux-adb` atau `vendor-adb-patched`, rusb dipakai secara luas oleh berbagai pengembang di seluruh dunia untuk proyek-proyek berikut:
+<br>
 1\. Pustaka Pengontrol Perangkat Kustom (*Hardware Drivers*)
 
 Banyak pengembang menggunakan `rusb` untuk membuat pengandar (*driver*) perangkat keras spesifik langsung menggunakan bahasa Rust:
