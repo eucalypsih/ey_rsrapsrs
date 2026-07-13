@@ -2357,8 +2357,11 @@ a-ai:
 Apakah perlu ditambahkan fitur baru pada kode sumber `termux-adb` hasil refaktor `parking_lot`? Jawabannya adalah **sangat perlu jika Anda mengejar stabilitas maksimal, kemudahan pelacakan masalah (debugging), dan performa yang lebih efisien saat digunakan di Android**.
 Kode saat ini sudah sangat bagus untuk penggunaan dasar, namun di dalam skenario nyata (seperti saat mentransfer file besar via `adb push`), program akan menghadapi beban kerja yang dinamis.
 Berikut adalah **tiga fitur krusial** yang sangat direkomendasikan untuk ditambahkan ke dalam kode `termux-adb` Anda beserta contoh implementasinya:
+
 Fitur 1: Mengubah `USB_FD_MAP` Menjadi `RwLock` (Akselerasi Performa)
-Mengapa ini penting?
+
+**Mengapa ini penting?**
+
 Di dalam kode Anda saat ini, `USB_FD_MAP` dilindungi oleh` Mutex`. Artinya, setiap kali ADB ingin membaca atau menulis data (yang memanggil fungsi `get_termux_fd` secara terus-menerus ribuan kali per detik), *thread* pembaca harus mengantre bergantian. Padahal, data peta tersebut **hanya dibaca** dan tidak diubah selama koneksi USB tersambung.
 **Solusinya**: Mengubah `Mutex` menjadi **`RwLock` (Reader-Writer Lock)** dari `parking_lot`. Ini mengizinkan semua *thread* ADB membaca File Descriptor secara bersamaan (paralel) tanpa mengunci satu sama lain, melenyapkan hambatan performa.
 ```
@@ -2377,8 +2380,79 @@ fn get_termux_fd(path: &Path) -> Option<RawFd> {
 }
 
 ```
+
 Fitur 2: Fitur Timeout pada Penguncian (`try_lock_for`)
-Mengapa ini penting?
+
+**Mengapa ini penting?**
+
+Jika detektor *deadlock* otomatis bawaan `parking_lot` mendeteksi adanya kebuntuan, ia akan mematikan paksa aplikasi (`std::process::exit(1)`). Bagi pengguna Termux, aplikasi yang mendadak mati tanpa peringatan tentu tidak menyenangkan.
+
+**Solusinya**: Menggunakan fitur `try_lock_for` dengan batas waktu (*timeout*). Jika sebuah *thread* gagal mendapatkan kunci setelah beberapa milidetik, ia tidak akan membuat aplikasi *crash*, melainkan membatalkan operasi secara elegan atau mencoba lagi (*graceful retry*).
+```
+// Contoh penerapan pada fungsi termuxadb_opendir
+#[no_mangle]
+pub unsafe extern "C" fn termuxadb_opendir(name: *const c_char) -> *mut DIR {
+    // ... (logika awal) ...
+
+    if name_str.starts_with(BASE_DIR_ORIG) {
+        let name_osstr = to_os_str(name_cstr);
+        
+        // Coba mengunci DIR_MAP, beri batas waktu tunggu maksimal 100 milidetik
+        if let Some(guard) = DIR_MAP.try_lock_for(Duration::from_millis(100)) {
+            let virtual_entries = guard.get(&PathBuf::from(name_osstr)).cloned();
+            if let Some(dir_entries) = virtual_entries {
+                return HookedDir::Virtual(DirStream::from(&dir_entries)).into();
+            }
+        } else {
+            // Jalur alternatif jika Mutex macet/terlalu sibuk: Beri peringatan dan pakai opsi Native
+            warn!("Sistem sibuk (Lock Timeout)! Mengalihkan pembacaan ke folder Native.");
+        }
+    }
+    
+    // ... (teruskan ke libc::opendir) ...
+}
+
+```
+
+Fitur 3: Injeksi Struktur `backtrace` pada Alarm Deadlock
+
+**Mengapa ini penting?**
+
+Fungsi `jalankan_pemantau_deadlock` saat ini hanya mencetak ID thread yang macet. Informasi ini tidak memberi tahu Anda **di baris kode mana** kemacetan itu terjadi.
+
+**Solusinya**: Memanfaatkan fitur pencetakan **`backtrace`** bawaan yang disediakan oleh pustaka `parking_lot` saat mendeteksi deadlock.
+```
+fn jalankan_pemantau_deadlock() {
+    thread::spawn(move || {
+        loop {
+            thread::sleep(Duration::from_secs(2));
+            let deadlocks = parking_lot::deadlock::check_deadlock();
+            if !deadlocks.is_empty() {
+                error!("⚠️ TERDETEKSI DEADLOCK PADA TABEL GLOBAL TERMUX-ADB! ⚠️");
+                for (i, threads) in deadlocks.iter().enumerate() {
+                    error!("Kasus Kebuntuan #{}", i);
+                    for t in threads {
+                        error!("  -> Thread ID: {:?}", t.thread_id());
+                        // FITUR BARU: Cetak urutan baris kode pemicu macet ke layar log Termux
+                        error!("  -> Jejak Baris Kode (Backtrace):\n{:?}", t.backtrace());
+                    }
+                }
+                std::process::exit(1); 
+            }
+        }
+    });
+}
+
+```
+
+Kesimpulan Rekomendasi
+
+Menambahkan ketiga fitur di atas akan mengubah kode `termux-adb` Anda dari sekadar "berjalan sukses" menjadi **pustaka berskala industri (*production-ready*)** yang siap menghadapi stres-test transfer data berkecepatan tinggi di Android.
+
+
+
+
+
 
 
 <br>
