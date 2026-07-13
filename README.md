@@ -2507,7 +2507,44 @@ Di komunitas keamanan siber, `rusb` adalah pustaka favorit untuk melakukan ***Re
 ---
 <br>
 
-Proyek Turunan (Forks) dari `rusb`
+Proyek Turunan (*Forks*) dari `rusb`
+<br>
 
+Saking populernya, kode sumber `rusb` juga melahirkan beberapa proyek modifikasi (fork) baru oleh komunitas untuk kebutuhan arsitektur yang berbeda:
+<br>
+
+&nbsp;&nbsp;&nbsp;&nbsp;&bull; `rusb-async`: Upaya pengembangan versi asinkronus agar `rusb` bisa terintegrasi langsung dengan ekosistem async tanpa memblokir thread utama.
+<br>
+
+&nbsp;&nbsp;&nbsp;&nbsp;&bull; [`yusb`](https://crates.io/crates/yusb): Proyek *fork* modern dari rusb yang dirancang untuk membersihkan sistem manajemen kompilasi serta memperbarui pustaka sistem pendukungnya (`libusb1-sys`).
+
+<br>
+
+Jika Anda tertarik untuk mempelajari implementasinya lebih lanjut pada kasus lain, silakan beri tahu saya:
+<br>
+
+&nbsp;&nbsp;&nbsp;&nbsp;&bull; Apakah Anda ingin melihat **contoh penggunaan `rusb` untuk membaca manifes Vendor ID (VID) perangkat** yang dicolokkan ke laptop Anda?
+<br>
+
+&nbsp;&nbsp;&nbsp;&nbsp;&bull; Apakah Anda ingin tahu **cara melakukan instalasi `rusb`** pada proyek Rust baru Anda?
+<br>
+
+
+
+<br>
+q:
+rusb selain digunakan oleh nohajc pada proyek termux-adb atau vendor-adb-patched
+<br>
+
+a-ai:
+Pustaka `rusb` (Rust USB) merupakan pustaka fondasi (*de facto standard*) di ekosistem Rust yang sangat populer. Pustaka ini tidak hanya digunakan untuk proyek Termux ADB, melainkan diadopsi secara luas oleh berbagai komunitas pengembang di seluruh dunia untuk mengendalikan perangkat keras eksternal.
+<br>
+
+Berikut adalah proyek-proyek besar dan populer lainnya yang menggunakan pustaka `rusb`:
+
+<br>
+
+1\. Ekosistem Dompet Kripto Fisik (Hardware Wallets)
+<br>
 
 <br>
