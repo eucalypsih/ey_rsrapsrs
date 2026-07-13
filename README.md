@@ -2451,6 +2451,23 @@ Menambahkan ketiga fitur di atas akan mengubah kode `termux-adb` Anda dari sekad
 
 
 
+q-ai:
+Jika Anda ingin melanjutkan pengembangannya, langkah mana yang ingin Anda pelajari berikutnya?
+- Apakah Anda ingin melihat **kode sumber utuh akhir** yang sudah menggabungkan fitur `RwLock` dan `Timeout` ini?
+- Apakah Anda membutuhkan panduan tentang **cara membaca data log `backtrace`** tersebut di dalam terminal Termux?
+
+q:
+https://github.com/a1ien/rusb ini selain dipakai oleh nohajc
+
+a-ai:
+Pustaka [rusb (Rust USB)](https://github.com/a1ien/rusb) merupakan **salah satu standar emas (de facto)** di ekosistem Rust untuk berinteraksi dengan perangkat keras USB. Pustaka ini sangat populer karena membungkus pustaka sistem bahasa C `libusb` menjadi kode yang aman khas Rust (`safe wrapper`).
+
+Selain digunakan oleh `nohajc` pada proyek `termux-adb` atau `vendor-adb-patched`, rusb dipakai secara luas oleh berbagai pengembang di seluruh dunia untuk proyek-proyek berikut:
+1. Pustaka Pengontrol Perangkat Kustom (*Hardware Drivers*)
+Banyak pengembang menggunakan rusb untuk membuat pengandar (driver) perangkat keras spesifik langsung menggunakan bahasa Rust:
+
+
+
 
 
 
