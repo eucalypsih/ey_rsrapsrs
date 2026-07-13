@@ -2459,10 +2459,10 @@ https://github.com/a1ien/rusb ini selain dipakai oleh nohajc
 
 a-ai:
 Pustaka [rusb (Rust USB)](https://github.com/a1ien/rusb) merupakan **salah satu standar emas (de facto)** di ekosistem Rust untuk berinteraksi dengan perangkat keras USB. Pustaka ini sangat populer karena membungkus pustaka sistem bahasa C `libusb` menjadi kode yang aman khas Rust (`safe wrapper`).
-
-Selain digunakan oleh `nohajc` pada proyek `termux-adb` atau `vendor-adb-patched`, rusb dipakai secara luas oleh berbagai pengembang di seluruh dunia untuk proyek-proyek berikut:
-
 <br>
+
+Selain digunakan oleh `nohajc` pada proyek `termux-adb` atau `vendor-adb-patched`, `rusb` dipakai secara luas oleh berbagai pengembang di seluruh dunia untuk proyek-proyek berikut:
+
 <br>
 
 1\. Pustaka Pengontrol Perangkat Kustom (*Hardware Drivers*)
@@ -2479,6 +2479,8 @@ Banyak pengembang menggunakan `rusb` untuk membuat pengandar (*driver*) perangka
 <br>
 
 2\. Alat Flashing & Pembaruan Firmware (*DFU Tools*)
+<br>
+
 
 
 
