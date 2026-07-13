@@ -2481,8 +2481,33 @@ Banyak pengembang menggunakan `rusb` untuk membuat pengandar (*driver*) perangka
 2\. Alat Flashing & Pembaruan Firmware (*DFU Tools*)
 <br>
 
+&nbsp;&nbsp;&nbsp;&nbsp;&bull; [dfu-rs](https://crates.io/crates/dfu-rs): Pustaka ini digunakan untuk mendeteksi, membaca, menghapus, serta menulis data firmware ke mikrokontroler yang mendukung mode *Device Firmware Upgrade* (DFU).
+<br>
 
+&nbsp;&nbsp;&nbsp;&nbsp;&bull; Pustaka ini memanfaatkan panggilan pemblokiran data dari `rusb` untuk memasukkan sistem operasi baru ke papan sirkuit (seperti STM32 pada perangkat IoT).
 
+<br>
+
+3\. Otomatisasi Alat Laboratorium & Industri
+<br>
+
+&nbsp;&nbsp;&nbsp;&nbsp;&bull; **Pengendalian Instrumen Sains (SCPI Over USB)**: Di dunia teknik elektro, `rusb` sering dipakai untuk memotong lapisan perangkat lunak VISA komputer yang berat.
+<br>
+
+&nbsp;&nbsp;&nbsp;&nbsp;&bull; Para peneliti menggunakannya untuk mengirimkan perintah teks ASCII secara langsung ke alat-alat ukur laboratorium seperti *Oscilloscope* atau *Signal Generator* murah (misalnya merek Rigol, Siglent, OWON) melalui jalur komunikasi USB.
+
+<br>
+
+4\. Rekayasa Balik Perangkat Keras (*Hardware Reverse Engineering*)
+<br>
+
+Di komunitas keamanan siber, `rusb` adalah pustaka favorit untuk melakukan ***Reverse Engineering* pada USB**. Pengembang memanfaatkannya untuk mengintip *endpoint* USB, mengklaim antarmuka hardware secara paksa, serta mengirimkan data kontrol (`write_control()`) untuk membongkar protokol komunikasi rahasia dari perangkat keras yang tidak memiliki driver resmi.
+
+<br>
+---
+<br>
+
+Proyek Turunan (Forks) dari `rusb`
 
 
 <br>
