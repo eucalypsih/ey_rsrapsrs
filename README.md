@@ -2415,8 +2415,7 @@ pub unsafe extern "C" fn termuxadb_opendir(name: *const c_char) -> *mut DIR {
 
 Fitur 3: Injeksi Struktur `backtrace` pada Alarm Deadlock
 
-**Mengapa ini penting?**
-
+**Mengapa ini penting?**\
 Fungsi `jalankan_pemantau_deadlock` saat ini hanya mencetak ID thread yang macet. Informasi ini tidak memberi tahu Anda **di baris kode mana** kemacetan itu terjadi.
 
 **Solusinya**: Memanfaatkan fitur pencetakan **`backtrace`** bawaan yang disediakan oleh pustaka `parking_lot` saat mendeteksi deadlock.
@@ -2463,6 +2462,7 @@ Pustaka [rusb (Rust USB)](https://github.com/a1ien/rusb) merupakan **salah satu 
 
 Selain digunakan oleh `nohajc` pada proyek `termux-adb` atau `vendor-adb-patched`, rusb dipakai secara luas oleh berbagai pengembang di seluruh dunia untuk proyek-proyek berikut:
 <br>
+
 1\. Pustaka Pengontrol Perangkat Kustom (*Hardware Drivers*)
 
 Banyak pengembang menggunakan `rusb` untuk membuat pengandar (*driver*) perangkat keras spesifik langsung menggunakan bahasa Rust:
