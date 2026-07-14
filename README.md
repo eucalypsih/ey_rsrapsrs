@@ -2617,7 +2617,7 @@ Teknik membungkus (*wrapping*) pustaka bahasa C yang tidak aman menggunakan atur
 Di dalam ekosistem Rust, terdapat konvensi standar industri di mana pengembang memisahkan kode C menjadi dua lapisan pustaka:
 <br>
 
-&nbsp;&nbsp;&nbsp;&nbsp;1\. <b>Pustaka `*-sys`</b>: Lapisan bawah yang mengimpor fungsi biner C mentah apa adanya. Kode di sini 100% *unsafe*.
+&nbsp;&nbsp;&nbsp;&nbsp;1\. <strong>Pustaka `*-sys`</strong>: Lapisan bawah yang mengimpor fungsi biner C mentah apa adanya. Kode di sini 100% *unsafe*.
 <br>
 
 &nbsp;&nbsp;&nbsp;&nbsp;2\. <b>Pustaka Wrapper</b>: Lapisan atas (seperti rusb, git2, openssl) yang membungkus fungsi *-sys tadi menggunakan sistem Ownership, Lifetimes, dan tipe data Result Rust agar menjadi 100% aman (Safe Rust).
