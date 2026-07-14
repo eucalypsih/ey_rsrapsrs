@@ -2601,7 +2601,7 @@ Jika Anda tertarik mengeksplorasi pustaka ini untuk kebutuhan Anda sendiri, sila
 &nbsp;&nbsp;&nbsp;&nbsp;&bull; Apakah Anda ingin melihat **contoh kode dasar `rusb` untuk membaca seluruh perangkat USB** yang terhubung di komputer Anda?
 <br>
 
-<p>&nbsp;&nbsp;&nbsp;&nbsp;&bull; Apakah Anda ingin tahu <b>cara menambahkan <b><code>rusb</code></b> ke proyek Rust baru</b> Anda?</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&bull; Apakah Anda ingin tahu <b>cara menambahkan <code></b>rusb</b></code> ke proyek Rust baru</b> Anda?</p>
 
 
 
