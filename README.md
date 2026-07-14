@@ -2601,25 +2601,35 @@ Jika Anda tertarik mengeksplorasi pustaka ini untuk kebutuhan Anda sendiri, sila
 &nbsp;&nbsp;&nbsp;&nbsp;&bull; Apakah Anda ingin melihat **contoh kode dasar `rusb` untuk membaca seluruh perangkat USB** yang terhubung di komputer Anda?
 <br>
 
-<p>&nbsp;&nbsp;&nbsp;&nbsp;&bull; Apakah Anda ingin tahu <b>cara menambahkan <code></b>rusb</b></code> ke proyek Rust baru</b> Anda?</p>
+&nbsp;&nbsp;&nbsp;&nbsp;&bull; Apakah Anda ingin tahu **cara menambahkan `rusb` ke proyek Rust baru** Anda?
 
 
 
 <br>
 q:
-<p>Dengan membungkus kode C libusb menggunakan aturan ketat Rust (rusb)selain libusb yang menggunakan aturan ketat Rust</p>
+Dengan membungkus kode C libusb menggunakan aturan ketat Rust (rusb)selain libusb yang menggunakan aturan ketat Rust
+<br>
 
-<p>Teknik membungkus (*wrapping*) pustaka bahasa C yang tidak aman menggunakan aturan ketat memori Rust (seperti yang dilakukan <b>rusb</b> terhadap <code>libusb</code>) disebut dengan <b>Safe FFI (Foreign Function Interface) Bindings</b>.</p>
+Teknik membungkus (*wrapping*) pustaka bahasa C yang tidak aman menggunakan aturan ketat memori Rust (seperti yang dilakukan **rusb** terhadap `libusb`) disebut dengan **Safe FFI (Foreign Function Interface) Bindings**.
+<br>
 
-<p>Di dalam ekosistem Rust, terdapat konvensi standar industri di mana pengembang memisahkan kode C menjadi dua lapisan pustaka:</p>
+Di dalam ekosistem Rust, terdapat konvensi standar industri di mana pengembang memisahkan kode C menjadi dua lapisan pustaka:
+<br>
 
-<p>&nbsp;&nbsp;&nbsp;&nbsp;1. <b>Pustaka <code>*-sys</code></b>: Lapisan bawah yang mengimpor fungsi biner C mentah apa adanya. Kode di sini 100% <i>unsafe</i>.</p>
+&nbsp;&nbsp;&nbsp;&nbsp;1\. Pustaka `*-sys`: Lapisan bawah yang mengimpor fungsi biner C mentah apa adanya. Kode di sini 100% *unsafe*.
+<br>
 
-<p>&nbsp;&nbsp;&nbsp;&nbsp;2. <b>Pustaka Wrapper</b>: Lapisan atas (seperti rusb, git2, openssl) yang membungkus fungsi <code>*-sys</code> tadi menggunakan sistem Ownership, Lifetimes, dan tipe data Result Rust agar menjadi 100% aman (Safe Rust).</p>
+&nbsp;&nbsp;&nbsp;&nbsp;2\. **Pustaka Wrapper**: Lapisan atas (seperti rusb, git2, openssl) yang membungkus fungsi `*-sys` tadi menggunakan sistem Ownership, Lifetimes, dan tipe data Result Rust agar menjadi 100% aman (Safe Rust).
+<br>
 
 
 
-# end
+
+
+
+
+
+# line
 
 
 
