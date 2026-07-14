@@ -2591,7 +2591,36 @@ Beberapa proyek emulator konsol terkenal memanfaatkan `rusb` untuk fitur **USB P
 Mengapa Pustaka Ini Begitu Diminati di Luar Proyek Termux?
 <br>
 
-Alasannya adalah keamanan memori (Memory Safety) Rust. Protokol USB sangat rentan terhadap serangan manipulasi paket data biner (buffer overflow). Dengan membungkus kode C libusb menggunakan aturan ketat Rust (rusb), aplikasi-aplikasi di atas dijamin aman dari celah keamanan kebocoran memori saat membaca data mentah dari perangkat keras luar.
+Alasannya adalah **keamanan memori (Memory Safety) Rust**. Protokol USB sangat rentan terhadap serangan manipulasi paket data biner (*buffer overflow*). Dengan membungkus kode C `libusb` menggunakan aturan ketat Rust (`rusb`), aplikasi-aplikasi di atas dijamin aman dari celah keamanan kebocoran memori saat membaca data mentah dari perangkat keras luar.
+
+<br>
+
+Jika Anda tertarik mengeksplorasi pustaka ini untuk kebutuhan Anda sendiri, silakan beri tahu saya:
+<br>
+
+&nbsp;&nbsp;&nbsp;&nbsp;&bull; Apakah Anda ingin melihat **contoh kode dasar `rusb` untuk membaca seluruh perangkat USB** yang terhubung di komputer Anda?
+<br>
+
+&nbsp;&nbsp;&nbsp;&nbsp;&bull; Apakah Anda ingin tahu **cara menambahkan `rusb` ke proyek Rust baru** Anda?
+<br>
+
+
+
+<br>
+q:
+Dengan membungkus kode C libusb menggunakan aturan ketat Rust (rusb)selain libusb yang menggunakan aturan ketat Rust
+<br>
+
+Teknik membungkus (*wrapping*) pustaka bahasa C yang tidak aman menggunakan aturan ketat memori Rust (seperti yang dilakukan `rusb` terhadap `libusb`) disebut dengan **Safe FFI (Foreign Function Interface) Bindings**.
+<br>
+
+Di dalam ekosistem Rust, terdapat konvensi standar industri di mana pengembang memisahkan kode C menjadi dua lapisan pustaka:
+<br>
+
+&nbsp;&nbsp;&nbsp;&nbsp;1\. <b>Pustaka `*-sys`</b>: Lapisan bawah yang mengimpor fungsi biner C mentah apa adanya. Kode di sini 100% *unsafe*.
+<br>
+
+&nbsp;&nbsp;&nbsp;&nbsp;2\. <b>Pustaka Wrapper</b>: Lapisan atas (seperti rusb, git2, openssl) yang membungkus fungsi *-sys tadi menggunakan sistem Ownership, Lifetimes, dan tipe data Result Rust agar menjadi 100% aman (Safe Rust).
 
 
 
