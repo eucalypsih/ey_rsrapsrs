@@ -2601,18 +2601,15 @@ Jika Anda tertarik mengeksplorasi pustaka ini untuk kebutuhan Anda sendiri, sila
 &nbsp;&nbsp;&nbsp;&nbsp;&bull; Apakah Anda ingin melihat **contoh kode dasar `rusb` untuk membaca seluruh perangkat USB** yang terhubung di komputer Anda?
 <br>
 
-&nbsp;&nbsp;&nbsp;&nbsp;&bull; Apakah Anda ingin tahu **cara menambahkan `rusb` ke proyek Rust baru** Anda?
-<br>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&bull; Apakah Anda ingin tahu **cara menambahkan `rusb` ke proyek Rust baru** Anda?</p>
 
 
 
 <br>
 q:
-Dengan membungkus kode C libusb menggunakan aturan ketat Rust (rusb)selain libusb yang menggunakan aturan ketat Rust
-<br>
+<p>Dengan membungkus kode C libusb menggunakan aturan ketat Rust (rusb)selain libusb yang menggunakan aturan ketat Rust</p>
 
-Teknik membungkus (*wrapping*) pustaka bahasa C yang tidak aman menggunakan aturan ketat memori Rust (seperti yang dilakukan `rusb` terhadap `libusb`) disebut dengan **Safe FFI (Foreign Function Interface) Bindings**.
-<br>
+<p>Teknik membungkus (*wrapping*) pustaka bahasa C yang tidak aman menggunakan aturan ketat memori Rust (seperti yang dilakukan <b>rusb</b> terhadap <code>libusb</code>) disebut dengan <b>Safe FFI (Foreign Function Interface) Bindings</b>.</p>
 
 <p>Di dalam ekosistem Rust, terdapat konvensi standar industri di mana pengembang memisahkan kode C menjadi dua lapisan pustaka:</p>
 
