@@ -20,6 +20,7 @@ Solusi Alternatif: Membuat Kode FFI Aman dan Elegan
 
 1. Gunakan Tipe Data Kompatibel C dari `std::ffi`
 <p>Jangan gunakan tipe data bawaan Rust langsung ke fungsi FFI. Gunakan modul `std::ffi` dan `core::ffi` untuk pengetikan yang aman.</p>
+
 ```rust
 use std::ffi::{CString, CStr};
 use std::os::raw::c_char;
