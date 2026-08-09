@@ -8,7 +8,7 @@ Berikut adalah penjelasan mengapa cara "tanpa paksaan" itu tidak ada di level FF
 <br>
 
 a-ai:
-<p>Konversi tipe data antara Rust murni dan C sama sekali tidak bisa dihindari di level FFI karena adanya perbedaan mendasar pada representasi data di memori dan struktur biner objek (ABI). Berikut adalah penjelasan mendalam mengenai batasan fisik tersebut serta solusi terbaik untuk membungkusnya secara aman.</p>
+Konversi tipe data antara Rust murni dan C sama sekali tidak bisa dihindari di level FFI karena adanya perbedaan mendasar pada representasi data di memori dan struktur biner objek (ABI). Berikut adalah penjelasan mendalam mengenai batasan fisik tersebut serta solusi terbaik untuk membungkusnya secara aman.
 
 Mengapa Konversi "Tanpa Paksaan" Tidak Mungkin di Level FFI
 - **Batasan ABI C (Application Binary Interface)**: C menggunakan konvensi pemanggilan (*calling convention*) dan tata letak memori (*memory layout*) yang kaku. Rust memiliki tata letak data yang dinamis (`repr(Rust)`) untuk optimalisasi kompilator. Tanpa konversi eksplisit atau transmutilasi memori menggunakan `repr(C)`, kompilator C tidak akan bisa membaca data yang dikirim oleh Rust, begitu pula sebaliknya.
@@ -19,7 +19,7 @@ Solusi Alternatif: Membuat Kode FFI Aman dan Elegan
 <p>Guna menjembatani batasan fisik ini tanpa mengorbankan keamanan *type-system* Rust, Anda harus memisahkan kode FFI mentah (*Unsafe Safe-Boundary*) dengan kode logika bisnis Rust murni menggunakan pola **Abstraksi FFI**.</p>
 
 1. Gunakan Tipe Data Kompatibel C dari `std::ffi`
-<p>Jangan gunakan tipe data bawaan Rust langsung ke fungsi FFI. Gunakan modul `std::ffi` dan `core::ffi` untuk pengetikan yang aman.</p>
+Jangan gunakan tipe data bawaan Rust langsung ke fungsi FFI. Gunakan modul `std::ffi` dan `core::ffi` untuk pengetikan yang aman.
 
 ```rust
 use std::ffi::{CString, CStr};
@@ -33,7 +33,7 @@ extern "C" {
 ```
 
 2. Bungkus FFI Mentah ke dalam Fungsi Aman (Safe Wrapper)
-<p>Buat fungsi abstraksi yang menangani konversi tipe data berbahaya di dalam blok `unsafe`, sehingga kode luar tetap bersih dan aman dari *crash*.</p>
+Buat fungsi abstraksi yang menangani konversi tipe data berbahaya di dalam blok `unsafe`, sehingga kode luar tetap bersih dan aman dari *crash*.
 
 ```rust
 pub fn safe_print_string(slice: &str) -> Result<(), std::ffi::NulError> {
@@ -134,7 +134,7 @@ fn kirim_data_ke_hook(buffer: SafeBuffer) {
 ```
 
 2. Konversi Parameter Primitif FFI Secara Otomatis
-<p>Jika fungsi FFI C menerima tipe data spesifik seperti `c_int` atau `c_long`, Anda dapat membuat fungsi pembungkus (*wrapper*) Rust yang menerima parameter bertipe generic `Into<T>`. Ini membuat fungsi Anda sangat fleksibel bagi pengguna kode Rust lainnya.</p>
+Jika fungsi FFI C menerima tipe data spesifik seperti `c_int` atau `c_long`, Anda dapat membuat fungsi pembungkus (*wrapper*) Rust yang menerima parameter bertipe generic `Into<T>`. Ini membuat fungsi Anda sangat fleksibel bagi pengguna kode Rust lainnya.
 
 ```rust
 use std::os::raw::c_int;
