@@ -33,7 +33,6 @@ extern "C" {
 
 2. Bungkus FFI Mentah ke dalam Fungsi Aman (Safe Wrapper)
 Buat fungsi abstraksi yang menangani konversi tipe data berbahaya di dalam blok `unsafe`, sehingga kode luar tetap bersih dan aman dari *crash*.
-
 ```rust
 pub fn safe_print_string(slice: &str) -> Result<(), std::ffi::NulError> {
     // Konversi dari &str (Rust) ke CString (C) - Memastikan ada \0 di ujung memori
@@ -50,8 +49,7 @@ pub fn safe_print_string(slice: &str) -> Result<(), std::ffi::NulError> {
 ```
 
 3. Abstraksi Struktur Data dengan `repr(C)`
-<p>Jika Anda harus mengirim atau menerima struktur data kompleks (`struct`) lewat fungsi *hooking* atau FFI, paksa kompilator Rust untuk menyusun memori persis seperti cara C menyusunnya.</p>
-
+Jika Anda harus mengirim atau menerima struktur data kompleks (`struct`) lewat fungsi *hooking* atau FFI, paksa kompilator Rust untuk menyusun memori persis seperti cara C menyusunnya.
 ```rust
 #[repr(C)]
 pub struct HookedData {
@@ -80,18 +78,17 @@ Jika Anda tidak menyukai penulisan kata kunci `as Self` karena terkesan melakuka
 <br>
 
 a-ai:
-<p>Penggunaan trait **Into** (dan pasangannya, **From**) merupakan pendekatan standar di dalam bahasa Rust untuk mengubah tipe data secara aman (**type-safe**) tanpa perlu menggunakan operator pemaksaan *primitive casting* seperti `as`. Saat berinteraksi dengan level FFI atau mekanisme *hooking*, mengeksploitasi sistem trait konversi ini membantu menyembunyikan detail konversi biner yang kasar di balik lapisan abstraksi yang bersih.</p>
+Penggunaan trait **Into** (dan pasangannya, **From**) merupakan pendekatan standar di dalam bahasa Rust untuk mengubah tipe data secara aman (**type-safe**) tanpa perlu menggunakan operator pemaksaan *primitive casting* seperti `as`. Saat berinteraksi dengan level FFI atau mekanisme *hooking*, mengeksploitasi sistem trait konversi ini membantu menyembunyikan detail konversi biner yang kasar di balik lapisan abstraksi yang bersih.
 
 Mengapa `Into` Lebih Aman dan Elegan Dibandingkan `as`
 - **Pencegahan Kegagalan Potensial (No Silent Truncation)**: Operator `as` melakukan pemotongan bit secara paksa tanpa peringatan jika tipe data tujuan lebih kecil dari tipe data asal (misal, mereduksi `u64` menjadi `u32`). Sebaliknya, implementasi `Into` dirancang untuk konversi yang dijamin tidak akan kehilangan data (*lossless*). Jika ada risiko kegagalan atau pemotongan, kompilator akan memaksa Anda menggunakan **TryInto**.
 - **Inferensi Tipe Otomatis**: Berbeda dengan `as` yang mewajibkan Anda menuliskan tipe data tujuan secara eksplisit (seperti `value as NativeHandle`), `Into` memanfaatkan fitur inferensi tipe data milik kompilator Rust. Anda cukup memanggil `.into()` dan Rust akan otomatis mendeteksi tipe data target berdasarkan tanda tangan (*signature*) fungsi FFI yang dituju.
 
 Penerapan `Into` dalam Skenario FFI dan Hooking
-<p>Berikut adalah cara memanfaatkan `Into` untuk mengubah struktur data tingkat tinggi Rust menjadi representasi primitif C ABI secara elegan.</p>
+Berikut adalah cara memanfaatkan `Into` untuk mengubah struktur data tingkat tinggi Rust menjadi representasi primitif C ABI secara elegan.
 
 1. Abstraksi Tipe Pointer untuk Hooking
-<p>Saat melakukan *hooking*, Anda sering kali berurusan dengan alamat memori mentah (`usize` atau `*mut c_void`). Daripada memaksa pointer objek Rust menggunakan `as usize`, Anda bisa membungkus pointer tersebut ke dalam tipe data khusus (*Newtype Pattern*) yang mengimplementasikan `From/Into`.</p>
-
+Saat melakukan *hooking*, Anda sering kali berurusan dengan alamat memori mentah (`usize` atau `*mut c_void`). Daripada memaksa pointer objek Rust menggunakan `as usize`, Anda bisa membungkus pointer tersebut ke dalam tipe data khusus (*Newtype Pattern*) yang mengimplementasikan `From/Into`.
 ```rust
 use std::ffi::c_void;
 
@@ -134,7 +131,6 @@ fn kirim_data_ke_hook(buffer: SafeBuffer) {
 
 2. Konversi Parameter Primitif FFI Secara Otomatis
 Jika fungsi FFI C menerima tipe data spesifik seperti `c_int` atau `c_long`, Anda dapat membuat fungsi pembungkus (*wrapper*) Rust yang menerima parameter bertipe generic `Into<T>`. Ini membuat fungsi Anda sangat fleksibel bagi pengguna kode Rust lainnya.
-
 ```rust
 use std::os::raw::c_int;
 
