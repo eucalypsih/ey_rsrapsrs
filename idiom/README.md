@@ -137,8 +137,21 @@ Anda bisa mengubahnya menjadi bentuk `match` atau `if let` yang sangat bersih.
 
 Berikut adalah perbandingan transformasinya agar kode Anda tetap _idiomatic_ dan sesuai dengan batasan FFI:
 
+**Opsi 1: Menggunakan `NonNull::new` (Paling Direkomendasikan & Aman untuk Tipe Opaque)**
 
+Pendekatan ini mirip dengan `as_ref()`, tetapi bekerja dengan aman pada tipe data biner C yang _opaque_ tanpa memicu _error_ ukuran memori.
+```rust
+// Menggantikan blok 'if dir.is_null()' secara total
+let dir_nonnull = match NonNull::new(dir) {
+    Some(ptr) => ptr,
+    None => return ptr::null_mut(),
+};
 
+// Setelah titik ini, Anda aman menggunakan dir_nonnull.as_ptr() 
+// atau langsung mengonversinya ke HookedDir
+HookedDir::Native(dir_nonnull.as_ptr()).into()
+
+```
 
 
 <br>
