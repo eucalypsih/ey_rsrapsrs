@@ -34,6 +34,7 @@ extern "C" {
 
 2. Bungkus FFI Mentah ke dalam Fungsi Aman (Safe Wrapper)
 <p>Buat fungsi abstraksi yang menangani konversi tipe data berbahaya di dalam blok `unsafe`, sehingga kode luar tetap bersih dan aman dari *crash*.</p>
+
 ```rust
 pub fn safe_print_string(slice: &str) -> Result<(), std::ffi::NulError> {
     // Konversi dari &str (Rust) ke CString (C) - Memastikan ada \0 di ujung memori
@@ -91,6 +92,7 @@ Penerapan `Into` dalam Skenario FFI dan Hooking
 
 1. Abstraksi Tipe Pointer untuk Hooking
 <p>Saat melakukan *hooking*, Anda sering kali berurusan dengan alamat memori mentah (`usize` atau `*mut c_void`). Daripada memaksa pointer objek Rust menggunakan `as usize`, Anda bisa membungkus pointer tersebut ke dalam tipe data khusus (*Newtype Pattern*) yang mengimplementasikan `From/Into`.</p>
+
 ```rust
 use std::ffi::c_void;
 
@@ -133,6 +135,7 @@ fn kirim_data_ke_hook(buffer: SafeBuffer) {
 
 2. Konversi Parameter Primitif FFI Secara Otomatis
 <p>Jika fungsi FFI C menerima tipe data spesifik seperti `c_int` atau `c_long`, Anda dapat membuat fungsi pembungkus (*wrapper*) Rust yang menerima parameter bertipe generic `Into<T>`. Ini membuat fungsi Anda sangat fleksibel bagi pengguna kode Rust lainnya.</p>
+
 ```rust
 use std::os::raw::c_int;
 
