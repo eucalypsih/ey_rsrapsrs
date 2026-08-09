@@ -16,11 +16,10 @@ Mengapa Konversi "Tanpa Paksaan" Tidak Mungkin di Level FFI
 - **Mekanisme Hooking (Penyanderaan Fungsi)**: Teknik *hooking* bekerja dengan cara menimpa instruksi memori atau mengubah alamat fungsi pada tabel virtual (IAT/EAT) ke fungsi tiruan kita. Karena fungsi target ditulis dalam spesifikasi C, fungsi *hook* di Rust wajib memalsukan dirinya agar terlihat identik di level register CPU. Hal ini memaksa penggunaan tipe data primitif C (`c_void`, `usize`, dll) pada argumen fungsi Rust.
 
 Solusi Alternatif: Membuat Kode FFI Aman dan Elegan
-<p>Guna menjembatani batasan fisik ini tanpa mengorbankan keamanan *type-system* Rust, Anda harus memisahkan kode FFI mentah (*Unsafe Safe-Boundary*) dengan kode logika bisnis Rust murni menggunakan pola **Abstraksi FFI**.</p>
+Guna menjembatani batasan fisik ini tanpa mengorbankan keamanan *type-system* Rust, Anda harus memisahkan kode FFI mentah (*Unsafe Safe-Boundary*) dengan kode logika bisnis Rust murni menggunakan pola **Abstraksi FFI**.
 
 1. Gunakan Tipe Data Kompatibel C dari `std::ffi`
 Jangan gunakan tipe data bawaan Rust langsung ke fungsi FFI. Gunakan modul `std::ffi` dan `core::ffi` untuk pengetikan yang aman.
-
 ```rust
 use std::ffi::{CString, CStr};
 use std::os::raw::c_char;
