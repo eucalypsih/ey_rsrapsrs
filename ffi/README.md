@@ -50,6 +50,7 @@ pub fn safe_print_string(slice: &str) -> Result<(), std::ffi::NulError> {
 
 3. Abstraksi Struktur Data dengan `repr(C)`
 <p>Jika Anda harus mengirim atau menerima struktur data kompleks (`struct`) lewat fungsi *hooking* atau FFI, paksa kompilator Rust untuk menyusun memori persis seperti cara C menyusunnya.</p>
+
 ```rust
 #[repr(C)]
 pub struct HookedData {
