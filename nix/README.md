@@ -513,12 +513,40 @@ gcc main.c -L./target/release -lmy_unix_helpers -lpthread -ldl -lrt -o program_c
 
 ```
 
+Untuk menautkan (_link_) pustaka statis Rust (`.a`) dengan kode C menggunakan `clang`, Anda harus menyertakan file pustaka Rust tersebut serta **pustaka sistem dasar** (seperti pustaka manajemen memori, _threading_, dan matematika) yang diwajibkan oleh Rust _runtime_.
+
+Berikut adalah perintah langsung untuk melakukan kompilasi:
+```bash
+clang main.c -L. -l:libnamapustaka.a -lrt -ldl -lpthread -lm -o program_utama
+
+```
+
+**Penjelasan Bendera Kumpulan Perintah (Flags)**
+- **`main.c`**: File sumber kode C Anda.
+- **`-L.`**: Memberitahu `clang` untuk mencari pustaka di direktori saat ini.
+- **`-l:libnamapustaka.a`**: Menautkan langsung file pustaka statis Rust Anda (ganti `libnamapustaka.a` dengan nama file asli Anda).
+- **`-lrt`**: Menyediakan fungsi _real-time_ (seperti pewaktu sistem).
+- **`-ldl`**: Memungkinkan pemuatan pustaka dinamis (_dynamic loading_).
+- **`-lpthread`**: Mengaktifkan dukungan multi-utas (_multi-threading_) POSIX.
+- **`-lm`**: Menautkan pustaka matematika standar.
+- **`-o program_utama`**: Menentukan nama file hasil eksekusi akhir.
+
+**Cara Mengetahui Pustaka Sistem Secara Tepat**
+Jika Anda menggunakan fungsi spesifik di Rust (seperti fitur jaringan atau kriptografi) yang membutuhkan pustaka sistem tambahan, Anda bisa meminta Rust untuk menjabarkan daftar pustaka yang ia butuhkan secara otomatis.
+
+Jalankan perintah ini di terminal proyek Rust Anda:
+```bash
+cargo rustc -- --print native-static-libs
+
+```
+Perintah di atas akan memunculkan teks panduan di terminal berisi seluruh bendera pustaka sistem yang wajib Anda salin dan tempel ke dalam perintah `clang` Anda.
+
 <br>
 
 q-ai:
 Apakah Anda ingin membuat fungsi Rust ini mengembalikan sebuah nilai (seperti angka ukuran file atau status _error_) ke kode C, atau ada **kebutuhan fungsi FFI tambahan** lainnya yang ingin Anda buat?
 
-
+Agar proses ini berjalan lancar, pastikan fungsi di sisi Rust sudah menggunakan atribut `#[no_mangle]` dan `pub extern "C"`. Jika Anda menemui kendala saat kompilasi, beri tahu saya **pesan galat (_error message_)** yang muncul atau **sistem operasi** yang Anda gunakan agar saya bisa memberikan solusi yang lebih spesifik.
 
 
 
