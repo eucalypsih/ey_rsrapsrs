@@ -1,5 +1,48 @@
 # ey_rsrapsrs
 
+q:
+membuat projek dari cargo
+
+<br>
+
+q-ai:
+Untuk membuat projek baru menggunakan **Cargo** (manajer paket dan sistem _build_ resmi bahasa pemrograman Rust), Anda hanya perlu menggunakan perintah **`cargo new nama_projek`** di terminal Anda.
+
+Berikut adalah panduan langkah demi langkah yang ringkas untuk memulai projek Anda:
+
+1. **Membuat Projek Aplikasi (Binary)**
+Secara bawaan, Cargo akan membuat projek berupa aplikasi yang bisa dieksekusi. Buka terminal dan ketik perintah berikut:
+```bash
+cargo new nama_projek_kamu
+cd nama_projek_kamu
+
+```
+Perintah ini otomatis membuat folder baru beserta struktur kode dasarnya.
+
+2. **Membuat Projek Library (Pustaka)**
+Jika Anda ingin membuat projek yang berfungsi sebagai pustaka (bukan aplikasi mandiri), tambahkan perintah `--lib`:
+```bash
+cargo new nama_pustaka_kamu --lib
+
+```
+
+3. **Memahami Struktur Folder Projek**
+Setelah projek dibuat, Cargo otomatis menyediakan struktur folder standar berikut:
+- **`Cargo.toml`**: Berkas manifest untuk mengatur identitas projek dan daftar dependensi library (crates).
+- **`src/main.rs`**: Berkas utama tempat Anda menulis kode Rust (jika memilih projek aplikasi).
+- **`.git`** & **`.gitignore`**: Cargo otomatis menginisialisasi Git agar projek siap diunggah ke repositori seperti GitHub.
+
+4. **Menjalankan Projek**
+Masuk ke dalam folder projek yang baru dibuat, lalu gunakan perintah berikut untuk langsung mengompilasi dan menjalankan program:
+```bash
+cargo run
+
+```
+Terminal akan menampilkan tulisan `"Hello, world!"` sebagai hasil bawaan program pertama Anda.
+
+
+<br>
+
 Fungsi Utama Berkas `Cargo.lock`
 Di dalam ekosistem pemrograman Rust, proyek dikelola menggunakan alat bernama **Cargo**. File `Cargo.lock` otomatis tercipta untuk mencatat **versi pasti (exact version)** dari semua pustaka pihak ketiga (*dependencies*) yang diunduh dan digunakan oleh `libtermuxadb`.
 
