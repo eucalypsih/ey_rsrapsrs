@@ -812,4 +812,67 @@ Saya bisa membantu mengoptimalkan performa interop C dan Rust Anda di lingkungan
 
 <br>
 
+q:
+meminta Rust untuk menjabarkan daftar pustaka yang ia butuhkan secara otomatis
+```bash
+$ cargo rustc -- --print native-static-libs
+   Compiling bitflags v2.13.1
+   Compiling cfg-if v1.0.4
+   Compiling libc v0.2.189
+   Compiling nix v0.31.3
+   Compiling libnixhelpers v0.1.0 (/data/data/com.termux/files/home/libnixhelpers)
+note: link against the following native artifacts when linking against this static library. The order and any duplication can be significant on some platforms
+
+note: native-static-libs: -ldl -llog -lunwind -ldl -lm -lc
+
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 6.24s
+
+```
+Untuk menautkan (_link_) pustaka statis Rust (`.a`) dengan kode C menggunakan `clang`
+
+<br>
+
+a-ai:
+Untuk menautkan (_link_) pustaka statis Rust (`libnixhelpers.a`) dengan kode C menggunakan `clang` di lingkungan Termux, Anda harus memasukkan semua pustaka sistem yang dijabarkan oleh Cargo tersebut ke dalam perintah kompilasi `clang`.
+
+**Perintah Kompilasi Clang**
+Gunakan perintah berikut di terminal Termux Anda:
+```bash
+clang main.c -L./target/debug -lnixhelpers -ldl -llog -lunwind -lm -lc -o main_program
+
+```
+**Penjelasan Parameter Kompilasi**
+- `main.c`: File sumber kode C Anda yang memanggil fungsi Rust.
+- **`-L./target/debug`**: Menambahkan jalur direktori tempat pustaka statis `.a` hasil kompilasi Rust berada (sesuaikan ke `./target/release` jika Anda menggunakan bendera `--release`).
+- **`-lnixhelpers`**: Menginstruksikan `clang` untuk menautkan berkas pustaka statis `libnixhelpers.a` (awalan `lib` dan ekstensi `.a` otomatis dihilangkan oleh _linker_).
+- **`-ldl -llog -lunwind -lm -lc`**: Daftar pustaka asli Android/Termux yang diminta oleh Cargo sebelumnya. Pustaka `-llog` sangat penting di Termux/Android karena digunakan oleh infrastruktur bawaan untuk mencetak log sistem.
+
+**Tips Tambahan untuk Otomatisasi**
+Jika Anda tidak ingin mengetik daftar pustaka tersebut secara manual setiap kali melakukan kompilasi, Anda bisa memanfaatkan _command substitution_ di terminal untuk menangkap teks tersebut secara otomatis:
+```bash
+# Simpan pustaka native ke dalam variabel environment
+export RUST_LIBS=$(cargo rustc -- --print native-static-libs 2>&1 | grep "native-static-libs:" | sed 's/note: native-static-libs: //')
+
+# Jalankan kompilasi menggunakan isi variabel tersebut
+clang main.c -L./target/debug -lnixhelpers $RUST_LIBS -o main_program
+
+```
+
+**Output dari terminal**
+```bash
+$ ./main_program
+Membuka berkas: contoh.txt
+Ukuran berkas 'contoh.txt' adalah 166 byte
+```
+
+<br>
+
+Jika Anda ingin melanjutkan proses integrasi ini, beri tahu saya:
+- Apakah Anda memerlukan bantuan untuk menulis **prototipe fungsi Rust** di dalam file `main.c` agar tidak terjadi _implicit declaration_?
+- Apakah Anda ingin mengonfigurasi **`Makefile`** atau **`CMakeLists.txt`** agar proses penautan ini otomatis setiap kali proyek dibangun?
+- Apakah Anda mengalami **error tautan (_linker error_)** tertentu saat menjalankan perintah `clangc` di Termux?
+Saya siap membantu menyempurnakan alur kerja interop C dan Rust Anda!
+
+<br>
+
 
