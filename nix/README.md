@@ -769,15 +769,26 @@ use nix::unistd::{lseek, Whence};
 /// Pemanggil fungsi dari sisi C wajib memastikan pointer tidak null dan menunjuk ke string C yang valid.
 #[unsafe(no_mangle)] // <-- Diperbarui untuk Rust 2024
 pub unsafe extern "C" fn contoh_fungsi(pathname: *const c_char) {
-    // 1. Validasi pointer null demi keamanan dasar
+    // Validasi pointer null demi keamanan dasar
+    // Validasi null pointer (Langkah dasar paling krusial)
+    // Pastikan pointer tidak null terlebih dahulu
     if pathname.is_null() {
         eprintln!("Error: Pointer pathname tidak boleh null!");
         return;
     }
 
-    // 2. Konversi raw pointer ke &CStr (Aman karena sudah di dalam fungsi unsafe)
-    let c_str = unsafe { CStr::from_ptr(pathname) };
-    
+    // Konversi raw pointer menjadi &CStr
+    // Konversi raw pointer ke &CStr (Aman karena sudah di dalam fungsi unsafe)
+    // Fungsi ini unsafe karena memeriksa memori hingga menemukan byte `\0`
+    let c_str: &CStr = unsafe { CStr::from_ptr(pathname) };
+
+    // (Opsional) Mengonversi &CStr menjadi &str (String Rust normal)
+    // .to_str() mengembalikan Result karena string C belum tentu UTF-8 valid
+    match c_str.to_str() {
+        Ok(rust_str) => println!("String Rust yang valid: {}", rust_str),
+        Err(e) => println!("Error: String C bukan UTF-8 yang valid ({})", e),
+    }
+
     // 3. Konversi ke String Rust untuk keperluan log atau manipulasi
     let path_string = c_str.to_string_lossy().into_owned();
     println!("Membuka berkas: {}", path_string);
@@ -872,6 +883,1136 @@ Jika Anda ingin melanjutkan proses integrasi ini, beri tahu saya:
 - Apakah Anda ingin mengonfigurasi **`Makefile`** atau **`CMakeLists.txt`** agar proses penautan ini otomatis setiap kali proyek dibangun?
 - Apakah Anda mengalami **error tautan (_linker error_)** tertentu saat menjalankan perintah `clangc` di Termux?
 Saya siap membantu menyempurnakan alur kerja interop C dan Rust Anda!
+
+<br>
+
+q:
+cara memastikan tiga syarat ini terpenuhi agar tidak terjadi crash (Undefined Behavior) tanpa di bungkus block unsafe
+
+
+
+<br>
+
+q:
+manakah yang lebih baik dari Pendekatan Validasi C-Style dan Pendekatan Idiomatic Rust
+
+<br>
+
+a-ai:
+Pendekatan **Idiomatic Rust (`pathname.as_ref()`) jauh lebih baik** untuk jangka panjang dibandingkan pendekatan C-Style (`pathname.is_null()`).
+
+Berikut adalah analisis perbandingan mendalam mengapa pendekatan Rust lebih unggul dalam menjamin keamanan memori:
+
+**Perbandingan Langsung**
+
+q:
+konversikan tabel perbandingan ke json
+
+a-ai:
+Berikut adalah hasil **konversi tabel perbandingan** dari gambar ke dalam format JSON:
+```json
+[
+  {
+    "fitur_aspek": "Keamanan Tipe Data",
+    "pendekatan_idiomatic_rust_as_ref": "Sangat Tinggi. Mengubah raw pointer menjadi referensi Rust ( &T ) yang tunduk pada aturan borrow checker.",
+    "pendekatan_c_style_is_null": "Rendah. Pointer tetap berupa raw pointer liar setelah diperiksa."
+  },
+  {
+    "fitur_aspek": "Pencegahan Error",
+    "pendekatan_idiomatic_rust_as_ref": "Otomatis. Struktur match atau if let memaksa pengembang menangani kasus null.",
+    "pendekatan_c_style_is_null": "Manual. Rawan kelupaan atau salah ketik logika if."
+  },
+  {
+    "fitur_aspek": "Keterbacaan",
+    "pendekatan_idiomatic_rust_as_ref": "Sangat ekspresif bagi pengembang Rust (Rustacean).",
+    "pendekatan_c_style_is_null": "Lebih mudah dipahami oleh pengembang transisi dari C/C++."
+  },
+  {
+    "fitur_aspek": "Performa",
+    "pendekatan_idiomatic_rust_as_ref": "Sama saja. Kompiler Rust akan mengoptimasi keduanya menjadi instruksi mesin yang identik.",
+    "pendekatan_c_style_is_null": "Sama saja. Tidak ada beban performa tambahan saat dijalankan."
+  }
+]
+
+```
+
+<br>
+
+q-ai:
+Apakah Anda memerlukan penyesuaian struktur key (misalnya menggunakan format camelCase) atau ingin mengubahnya ke bentuk objek bersarang?
+
+<br>
+
+q-c:
+mengubahnya ke bentuk objek bersarang
+
+<br>
+
+a-ai:
+Berikut adalah data tabel yang telah diubah ke dalam bentuk **objek bersarang** (nested object) dengan fitur/aspek sebagai _key_ utamanya:
+```json
+{
+  "Keamanan Tipe Data": {
+    "pendekatan_idiomatic_rust_as_ref": "Sangat Tinggi. Mengubah raw pointer menjadi referensi Rust ( &T ) yang tunduk pada aturan borrow checker.",
+    "pendekatan_c_style_is_null": "Rendah. Pointer tetap berupa raw pointer liar setelah diperiksa."
+  },
+  "Pencegahan Error": {
+    "pendekatan_idiomatic_rust_as_ref": "Otomatis. Struktur match atau if let memaksa pengembang menangani kasus null.",
+    "pendekatan_c_style_is_null": "Manual. Rawan kelupaan atau salah ketik logika if."
+  },
+  "Keterbacaan": {
+    "pendekatan_idiomatic_rust_as_ref": "Sangat ekspresif bagi pengembang Rust (Rustacean).",
+    "pendekatan_c_style_is_null": "Lebih mudah dipahami oleh pengembang transisi dari C/C++."
+  },
+  "Performa": {
+    "pendekatan_idiomatic_rust_as_ref": "Sama saja. Kompiler Rust akan mengoptimasi keduanya menjadi instruksi mesin yang identik.",
+    "pendekatan_c_style_is_null": "Sama saja. Tidak ada beban performa tambahan saat dijalankan."
+  }
+}
+
+```
+
+<br>
+
+q-ai:
+Apakah Anda ingin saya mengubah format key teks di atas menjadi snake_case atau camelCase agar lebih mudah diakses dalam kode pemrograman?
+
+<br>
+
+**Alasan Mengapa Idiomatic Rust Lebih Unggul**
+
+1. **Mencegah Kegagalan "Pemeriksaan Palsu"**
+Pada pendekatan C-Style, Anda bisa saja lolos dari pemeriksaan `if pathname.is_null()`, namun variabel `pathname` tersebut **tetap berstatus sebagai _raw pointer_**. Di baris kode setelahnya, Anda masih bisa melakukan kesalahan fatal secara tidak sengaja.
+
+Pada pendekatan Idiomatic Rust, begitu lolos dari pemeriksaan `match`, Anda mendapatkan variabel baru bernilai aman:
+```rust
+let name_ptr = match unsafe { name.as_ref() } {
+    Some(ptr) => ptr, // name_ptr sekarang bertipe &c_char (SANGAT AMAN)
+    None => return libc::opendir(name),
+};
+// Di sini, Anda sudah tidak bisa lagi menyalahgunakan `name_ptr` sebagai pointer liar.
+
+```
+_(Catatan: `.as_ref()` pada raw pointer membutuhkan blok `unsafe` karena Rust tidak bisa menjamin validitas alamat memori non-null tersebut)._
+
+2. **Memanfaatkan Kekuatan Sistem Tipe Rust**
+Filosofi utama Rust adalah "Type Safety". Dengan mengubah pointer mentah menjadi tipe data `Option`, Anda memindahkan tanggung jawab keamanan dari otak manusia (yang rawan salah) ke tangan kompiler. Kompiler akan menolak membuat aplikasi jika Anda lupa menangani kondisi `None`.
+
+**Kesimpulan & Rekomendasi**
+- **Gunakan Pendekatan Idiomatic Rust (`as_ref()`)** sebagai standar utama dalam setiap kode FFI yang Anda tulis. Ini adalah cara paling aman untuk menjinakkan pointer liar dari bahasa C.
+- **Gunakan Pendekatan C-Style (`is_null()`)** hanya jika fungsi Anda sangat pendek dan langsung meneruskan kembali pointer tersebut ke fungsi C lainnya tanpa menyentuh atau membaca isinya sama sekali di dalam Rust.
+
+<br>
+
+q-ai:
+Jika Anda ingin melanjutkan pengembangan modul FFI ini, langkah berikutnya yang bisa kita bahas adalah:
+- Cara menangani **Arsitektur Rust 2024** menggunakan makro `#[unsafe(no_mangle)]` secara tepat.
+- Cara melakukan **pemeriksaan otomatis (Static Analysis)** agar kode FFI Anda bebas dari celah keamanan.
+
+<br>
+
+q:
+let name_ptr = match unsafe { name.as_ref() } { ... }
+
+tanpa di bungkus block unsafe
+
+<br>
+
+a-ai:
+Jika Anda tidak ingin membungkus `.as_ref()` di dalam blok unsafe, satu-satunya cara adalah **menjadikan seluruh fungsi tersebut sebagai fungsi `unsafe`** [^1].
+
+Di dalam fungsi yang dideklarasikan dengan kata kunci `unsafe fn`, Anda dapat memanggil operasi `unsafe` secara langsung tanpa perlu membuat blok `unsafe { ... }` tambahan di dalamnya.
+
+Berikut adalah cara penulisan yang benar dan bersih:
+
+**Kode Implementasi**
+```rust
+use std::os::raw::c_char;
+
+// Seluruh fungsi ditandai sebagai `unsafe`, sehingga blok `unsafe { ... }` di dalam tidak diperlukan lagi
+#[no_mangle]
+pub unsafe extern "C" fn termuxadb_opendir(name: *const c_char) -> *mut libc::DIR {
+    
+    // `.as_ref()` bisa dipanggil langsung tanpa bungkus blok unsafe
+    let name_ptr = match name.as_ref() {
+        Some(ptr) => ptr,
+        None => return libc::opendir(name),
+    };
+    
+    // ... sisa kode Anda ...
+    libc::opendir(name)
+}
+
+```
+
+**Mengapa Ini Bisa Dilakukan?**
+1. **Aturan Cakupan `unsafe fn`**: Ketika Anda menulis `pub unsafe extern "C" fn`, Anda sedang memberi tahu kompiler bahwa seluruh tubuh (_body_) fungsi tersebut berada di dalam ruang lingkup `unsafe` [^1].
+2. **Kompiler Mengizinkannya**: Karena fungsi tersebut sudah dicap berbahaya dari luar, Rust mengizinkan Anda memanggil fungsi dereferensi pointer seperti `.as_ref()` secara langsung di dalamnya [^1].
+
+**Catatan Penting untuk Rust Evolved (Edisi 2024 ke atas)**
+Meskipun cara di atas valid, komunitas Rust modern (dan edisi terbaru) mulai menyarankan fitur bernama **`unsafe_op_in_unsafe_fn`**.
+
+Jika fitur tersebut aktif di proyek Anda, kompiler akan tetap memaksa Anda menulis blok `unsafe { name.as_ref() }` _meskipun_ fungsi luarnya sudah bertanda `unsafe fn`. Tujuannya agar Anda tahu persis baris mana yang benar-benar berbahaya dan baris mana yang merupakan kode Rust normal.
+
+<br>
+
+q-ai:
+Jika Anda ingin merapikan arsitektur FFI ini lebih lanjut, beri tahu saya jika Anda ingin melihat:
+- Cara memisahkan **fungsi FFI luar (`unsafe`)** dan **logika bisnis dalam (`safe`)** agar kode Anda lebih modular.
+- Cara mendeteksi peringatan compiler terkait **`unsafe_op_in_unsafe_fn`**.
+
+<br>
+
+q:
+Cara memisahkan fungsi FFI luar (unsafe) dan logika bisnis dalam (safe) agar kode Anda lebih modular.
+
+<br>
+
+a-ai:
+Memisahkan fungsi FFI luar (`unsafe`) dan logika bisnis dalam (`safe`) adalah **praktik terbaik (_best practice_) utama dalam Rust FFI** [1]. Pola desain ini disebut dengan **Boundary / Encapsulation Pattern** [1].
+
+Dengan pola ini, fungsi FFI luar hanya bertugas sebagai "penerjemah" data dari bahasa C, sedangkan logika bisnis inti Anda ditulis menggunakan kode Rust yang 100% aman (_safe_) dan modular [1].
+
+**Struktur Arsitektur Modular**
+Struktur terbaik adalah memisahkan kode menjadi dua bagian/berkas:
+1. **`ffi.rs` (Lapisan Luar / Unsafe)**: Menangani pointer C, memeriksa nilai `null`, dan memanggil fungsi Rust [1].
+2. **`logic.rs` (Lapisan Dalam / Safe)**: Menggunakan tipe data asli Rust (`&str`, `Path`, `Result`) dan tidak tahu apa-apa tentang bahasa C [1].
+
+*iImplementasi Kode**
+Berikut adalah contoh cara memisahkan fungsi `termuxadb_opendir` Anda menjadi arsitektur yang modular:
+1. **Lapisan Logika Bisnis (`logic.rs` - 100% Safe)**
+Lapisan ini fokus pada apa yang ingin dilakukan oleh aplikasi Anda. Menggunakan tipe data aman dan menangani error menggunakan `Result` standar Rust.
+```rust
+use std::path::Path;
+use std::io;
+
+// Fungsi ini sepenuhnya AMAN, modular, dan mudah di-unit test
+pub fn batasi_akses_direktori(jalur: &str) -> io::Result<()> {
+    let path = Path::new(jalur);
+    
+    // Contoh Logika Bisnis: Blokir akses jika mencoba membuka folder sistem rahasia
+    if path.starts_with("/system/etc") {
+        return Err(io::Error::new(io::ErrorKind::PermissionDenied, "Akses diblokir"));
+    }
+    
+    // Jalankan logika bisnis Anda yang lain di sini...
+    Ok(())
+}
+
+```
+
+2. **Lapisan Antarmuka FFI (`ffi.rs` - Unsafe Boundary)**
+Lapisan ini bertindak sebagai jembatan. Tugasnya hanya memvalidasi pointer C, mengubahnya menjadi tipe data Rust, memanggil fungsi safe, dan mengembalikan hasilnya ke format C.
+```rust
+use std::ffi::CStr;
+use std::os::raw::c_char;
+use crate::logic::batasi_akses_direktori;
+
+// Gunakan makro edisi Rust 2024 jika Anda sudah memperbaruinya
+#[no_mangle]
+pub unsafe extern "C" fn termuxadb_opendir(name: *const c_char) -> *mut libc::DIR {
+    // 1. Validasi Null Pointer bergaya Idiomatic Rust
+    let name_ptr = match name.as_ref() {
+        Some(ptr) => ptr,
+        None => return libc::opendir(name), // Langsung bypass ke libc jika null
+    };
+
+    // 2. Konversi C-String ke &str Rust yang valid
+    let c_str = unsafe { CStr::from_ptr(name) };
+    let jalur_rust = match c_str.to_str() {
+        Ok(teks) => teks,
+        Err(_) => return std::ptr::null_mut(), // Kembalikan null jika string bukan UTF-8 valid
+    };
+
+    // 3. Panggil Logika Bisnis yang Aman
+    match batasi_akses_direktori(jalur_rust) {
+        Ok(_) => {
+            // Jika logika bisnis lolos, teruskan ke fungsi opendir asli milik OS
+            libc::opendir(name)
+        }
+        Err(_) => {
+            // Jika logika bisnis menolak (misal: Permission Denied), set error OS dan return null
+            *libc::__errno_location() = libc::EACCES; 
+            std::ptr::null_mut()
+        }
+    }
+}
+
+```
+
+**Keuntungan Utama Pola Modular Ini**
+- **Dapat Diuji (Testable)**: Anda bisa menulis _Unit Test_ normal untuk fungsi `batasi_akses_direktori` di Rust tanpa perlu repot membuat pointer C buatan (`*const c_char`) [1].
+- **Isolasi Kerusakan (Siloing Unsafe)**: Jika terjadi _bug_ memori (_segfault/crash_), Anda tahu pasti bahwa masalahnya 100% ada di berkas `ffi.rs`, bukan di logika aplikasi Anda [1].
+- **Kemudahan Reusabilitas**: Fungsi `batasi_akses_direktori` sekarang bisa dipanggil oleh fungsi Rust lainnya di masa depan, tidak terbatas hanya untuk fungsi FFI C saja.
+
+<br>
+
+q-ai:
+Jika Anda ingin menyempurnakan struktur proyek Android/Termux ini, beri tahu saya jika Anda ingin mempelajari:
+- Cara mengatur file `Cargo.toml` agar menghasilkan pustaka dinamis (`.so`) yang benar untuk Android.
+- Cara menangani **penerjemahan error (`Panic`)** di dalam FFI agar program C tidak langsung _crash_ saat Rust mengalami panic.
+
+<br>
+
+q-c:
+Cara menangani penerjemahan error (Panic) di dalam FFI agar program C tidak langsung crash saat Rust mengalami panic.
+
+<br>
+
+a-ai:
+Menangani `panic` di dalam fungsi FFI adalah hal yang **wajib hukumnya** di Rust.
+
+Jika program Rust mengalami `panic` dan _unwinding_ (proses pembersihan memori) melewati batas FFI ke bahasa C, hal tersebut akan memicu _Undefined Behavior_ (UB) yang biasanya langsung membuat program C **crash seketika** dengan pesan _Segmentation Fault_.
+
+Cara paling aman untuk mengatasinya adalah menggunakan fungsi `catch_unwind` dari pustaka standar Rust.
+
+**Pola Implementasi `catch_unwind` pada FFI**
+Fungsi `catch_unwind` bertindak seperti blok `try/catch` di bahasa lain. Fungsi ini akan menangkap `panic` dan mengubahnya menjadi tipe data `Result`, sehingga Anda bisa mengembalikan nilai error standar (seperti `NULL` atau kode angka `-1`) ke bahasa C secara aman.
+
+Berikut adalah cara menerapkannya pada fungsi `termuxadb_opendir` Anda:
+```rust
+use std::ffi::CStr;
+use std::os::raw::c_char;
+use std::panic::catch_unwind;
+
+#[no_mangle]
+pub unsafe extern "C" fn termuxadb_opendir(name: *const c_char) -> *mut libc::DIR {
+    // 1. Bungkus seluruh logika di dalam catch_unwind
+    let result = catch_unwind(|| {
+        // Validasi awal pointer
+        let name_ptr = match name.as_ref() {
+            Some(ptr) => ptr,
+            None => return libc::opendir(name),
+        };
+
+        let c_str = CStr::from_ptr(name);
+        let jalur_rust = match c_str.to_str() {
+            Ok(teks) => teks,
+            Err(_) => return std::ptr::null_mut(),
+        };
+
+        // Di sini kita panggil logika bisnis Anda (yang berpotensi panic, misal .unwrap())
+        match crate::logic::batasi_akses_direktori(jalur_rust) {
+            Ok(_) => libc::opendir(name),
+            Err(_) => {
+                *libc::__errno_location() = libc::EACCES;
+                std::ptr::null_mut()
+            }
+        }
+    });
+
+    // 2. Evaluasi hasil catch_unwind
+    match result {
+        // Jika berjalan normal, kembalikan pointer direktori (bisa berupa pointer valid atau NULL bawaan C)
+        Ok(dir_ptr) => dir_ptr,
+        
+        // Jika terjadi PANIC di dalam Rust, tangkap di sini agar program C tidak crash
+        Err(_err) => {
+            // Cetak log darurat ke stderr jika diperlukan (opsional)
+            eprintln!("Error internal: Terjadi panic di dalam pustaka Rust FFI.");
+            
+            // Atur kode error standar OS (errno) agar program C tahu ada kegagalan internal
+            unsafe {
+                *libc::__errno_location() = libc::EFAULT; // Bad address / Internal error
+            }
+            
+            // Kembalikan NULL ke fungsi C sebagai tanda operasi gagal total
+            std::ptr::null_mut()
+        }
+    }
+}
+
+```
+
+**Strategi Tambahan untuk Keamanan Berlapis**
+Selain menggunakan `catch_unwind`, ada dua konfigurasi penting yang sangat direkomendasikan untuk proyek FFI (terutama di Android/Termux):
+1. **Ubah Strategi Panic Menjadi `abort` di `Cargo.toml`**
+Jika aplikasi Anda tidak membutuhkan pemulihan dari `panic`, cara paling bersih dan hemat memori adalah memaksa Rust untuk langsung melakukan `abort` (menghentikan proses secara teratur) alih-alih melakukan_ unwinding_. Ini mencegah UB melewati batas FFI secara total.
+
+Tambahkan baris berikut di file `Cargo.toml` proyek Anda:
+```toml
+[profile.release]
+panic = "abort" # Langsung hentikan program dengan aman saat panic, tanpa unwinding [4]
+
+```
+
+2. **Hindari `unwrap()` dan `expect()` pada Kode FFI**
+Cara terbaik menangani panic adalah dengan **tidak membiarkannya terjadi sejak awal**.
+- Di dalam lapisan logika bisnis, ganti semua penggunaan `.unwrap()` atau `.expect()` dengan pencocokan pola `match` atau operator `?`.
+- Kembalikan tipe `Result<T, E>` dan konversikan error tersebut menjadi angka integer (`0` untuk sukses, `-1` untuk gagal) yang dipahami oleh bahasa C.
+
+<br>
+
+q-ai:
+Jika Anda ingin melanjutkan optimasi proyek ini, beri tahu saya jika Anda ingin mempelajari:
+- Cara mengonfigurasi `Cargo.toml` untuk kompilasi silang (_cross-compile_) khusus arsitektur Android (`aarch64-linux-android`).
+- Cara menangani **`String` alokasi dinamis** dari Rust agar tidak terjadi kebocoran memori (_memory leak_) saat dikirim ke C.
+
+<br>
+
+q-c:
+Cara mengonfigurasi `Cargo.toml` untuk kompilasi silang (_cross-compile_) khusus arsitektur Android (`aarch64-linux-android`).
+
+<br>
+
+a-ai:
+Berikut adalah file konfigurasi `Cargo.toml` yang telah dioptimalkan khusus untuk proyek FFI Android Anda.
+
+```toml
+[package]
+name = "termuxadb_ffi"
+version = "0.1.0"
+edition = "2024"
+
+[lib]
+# Mengonfigurasi library agar dikompilasi menjadi pustaka dinamis (.so) yang bisa dimuat oleh C/Android
+crate-type = ["cdylib"]
+
+[dependencies]
+# Dependensi untuk berinteraksi dengan API sistem Unix/Android
+libc = "0.2"
+
+[profile.release]
+# Menolak unwinding melewati batas FFI untuk mencegah crash/Undefined Behavior
+panic = "abort"
+# Mengoptimalkan ukuran biner agar lebih kecil dan efisien di Android
+opt-level = "z"
+lto = true
+codegen-units = 1
+
+```
+
+**Ringkasan Konfigurasi** `Cargo.toml`
+- **crate-type = ["cdylib"]**: Wajib diatur agar Rust menghasilkan berkas pustaka dinamis dengan ekstensi `.so` (shared object), bukan pustaka internal Rust (`.rlib`). Format `.so` inilah yang nantinya dapat dimuat oleh aplikasi Android atau perkakas berbasis C di Termux.
+- **panic = "abort"**: Seperti yang telah dibahas sebelumnya, opsi ini langsung menghentikan program dengan aman jika terjadi panic, mencegah terjadinya _Undefined Behavior_ yang bisa merusak aplikasi utama di Android.
+- **opt-level = "z" & lto = true**: Mengaktifkan optimasi ukuran biner paling agresif. Ini sangat penting untuk platform seluler seperti Android agar ukuran pustaka `.so` Anda tetap kecil dan hemat ruang penyimpanan.
+
+**Langkah Penting Tambahan untuk Cross-Compilation**
+Menyesuaikan `Cargo.toml` saja tidak cukup untuk melakukan kompilasi silang ke arsitektur `aarch64-linux-android`. Anda memerlukan Android NDK dan konfigurasi target pada sistem Anda. Ikuti langkah-langkah berikut:
+1. **Pasang Target Arsitektur Android**
+Unduh pustaka standar Rust khusus untuk arsitektur Android 64-bit melalui terminal Anda:
+```rust
+rustup target add aarch64-linux-android
+
+```
+
+2. **Konfigurasi Linker NDK (`.cargo/config.toml`)**
+Rust membutuhkan _linker_ dari Android NDK untuk menyatukan kode menjadi berkas `.so`. Buatlah sebuah berkas baru bernama config.toml di dalam folder beralur `.cargo/` pada direktori utama proyek Anda, lalu masukkan konfigurasi berikut:
+```toml
+[target.aarch64-linux-android]
+# Sesuaikan jalur/path di bawah dengan lokasi instalasi Android NDK di komputer Anda
+linker = "/path/to/android-ndk/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android34-clang"
+
+```
+_(Catatan: Ganti angka `34` dengan target API Level Android yang Anda tuju, misalnya `24` untuk Android 7.0 atau `33` untuk Android 13)._
+
+3. **Jalankan Perintah Kompilasi**
+Setelah semua siap, Anda dapat membuat pustaka rilis akhir menggunakan perintah:
+```bash
+cargo build --target aarch64-linux-android --release
+
+```
+Hasil kompilasi berupa berkas `.so` yang siap digunakan akan berada di direktori `target/aarch64-linux-android/release/libtermuxadb_ffi.so`.
+
+<br>
+
+q-ai:
+Jika Anda ingin melanjutkan langkah integrasi ini, beri tahu saya jika Anda ingin mempelajari:
+- Cara memuat dan **memanggil berkas `.so` tersebut dari skrip C** di Termux.
+- Cara otomatisasi build menggunakan `Makefile` agar tidak perlu mengetik perintah panjang setiap kali kompilasi.
+
+<br>
+
+q-c:
+Cara mendeteksi peringatan compiler terkait **`unsafe_op_in_unsafe_fn`**.
+
+<br>
+
+a-ai:
+Fitur **`unsafe_op_in_unsafe_fn`** adalah aturan compiler Rust yang memaksa Anda untuk tetap menulis blok `unsafe { ... }` di dalam fungsi yang sudah bertanda `unsafe fn`.
+
+Aturan ini sangat direkomendasikan untuk mendeteksi baris kode mana yang benar-benar berbahaya, terpisah dari baris kode normal yang aman [^1]. Sejak edisi **Rust 2024**, aturan ini diaktifkan secara otomatis (menjadi _warning_ bawaan).
+
+Berikut adalah beberapa cara untuk mendeteksi dan mengaktifkan peringatan tersebut di proyek Anda:
+1. **Mengaktifkan secara Global via `Cargo.toml` (Sangat Direkomendasikan)**
+Cara terbaik untuk mendeteksi hal ini di seluruh proyek adalah dengan menambahkannya ke bagian konfigurasi lint di file `Cargo.toml` Anda.
+```toml
+[lints.rust]
+# Mengubah statusnya dari "allowed" menjadi "warn" (peringatan saat dicompile)
+unsafe_op_in_unsafe_fn = "warn"
+
+# ATAU jika Anda ingin compiler langsung error/gagal build saat ada pelanggaran:
+# unsafe_op_in_unsafe_fn = "deny"
+
+```
+
+2. **Mengaktifkan per Berkas Kode (`.rs`)**
+Jika Anda hanya ingin mendeteksinya di berkas FFI tertentu (misalnya di `ffi.rs`), tambahkan atribut berikut di baris paling atas berkas tersebut:
+```rust
+#![warn(unsafe_op_in_unsafe_fn)]
+
+// Sekarang, jika Anda menulis kode seperti di bawah ini, compiler akan memberi peringatan:
+#[no_mangle]
+pub unsafe extern "C" fn termuxadb_opendir(name: *const c_char) -> *mut libc::DIR {
+    // BERBAHAYA: .as_ref() adalah operasi unsafe, tetapi tidak dibungkus blok unsafe
+    let name_ptr = name.as_ref(); 
+    
+    libc::opendir(name)
+}
+
+```
+
+**Cara Membaca Peringatan Compiler**
+Ketika Anda menjalankan perintah `cargo check` atau `cargo build`, Rust akan mengeluarkan pesan peringatan (lint) yang terlihat seperti ini jika mendeteksi pelanggaran:
+```bash
+warning: unsafe operation underscores unsafe function body
+ --> src/ffi.rs:6:20
+  |
+6 |     let name_ptr = name.as_ref();
+  |                    ^^^^^^^^^^^^^ unsafe expression omitted from unsafe block
+  |
+  = note: an unsafe function body does not implicitly allow unsafe operations
+
+```
+
+**Cara Memperbaiki Kode Sesuai Rekomendasi Lint**
+Untuk menghilangkan peringatan tersebut, Anda harus membungkus operasi _raw pointer_ tersebut secara spesifik di dalam blok `unsafe { ... }` internal, meskipun fungsi luarnya sudah bertanda `unsafe fn` [^1].
+```rust
+#![warn(unsafe_op_in_unsafe_fn)]
+
+#[no_mangle]
+pub unsafe extern "C" fn termuxadb_opendir(name: *const c_char) -> *mut libc::DIR {
+    // BENAR: Operasi yang benar-benar unsafe diisolasi di dalam bloknya sendiri
+    let name_ptr = unsafe { name.as_ref() }; 
+    
+    match name_ptr {
+        Some(_) => unsafe { libc::opendir(name) }, // opendir juga operasi unsafe
+        None => std::ptr::null_mut(),
+    }
+}
+
+```
+
+<br>
+
+q-ai:
+Jika Anda ingin memperketat kualitas kode FFI Anda lebih lanjut, beri tahu saya jika Anda ingin mempelajari:
+- Cara menggunakan perkakas otomatis **`cargo clippy`** untuk mendeteksi celah keamanan FFI lainnya.
+- Cara mengintegrasikan **fitur analisis statis** ini ke dalam sistem otomatis (CI/CD).
+
+<br>
+
+q-c:
+Cara menggunakan perkakas otomatis **`cargo clippy`** untuk mendeteksi celah keamanan FFI lainnya.
+
+<br>
+a-ai:
+`cargo clippy` adalah perkakas _linter_ bawaan Rust yang sangat kuat untuk menangkap kesalahan logika, inefisiensi kode, dan celah keamanan tersembunyi, khususnya pada batasan FFI [^2].
+
+Berikut adalah panduan lengkap cara menggunakan dan mengonfigurasi Clippy untuk mengamankan kode FFI Anda.
+
+1. **Cara Menjalankan Clippy**
+Untuk memeriksa proyek Anda secara standar, jalankan perintah berikut di terminal:
+```bash
+cargo clippy
+```
+Namun, untuk mendeteksi celah keamanan FFI yang lebih spesifik dan ketat, Anda disarankan mengaktifkan kategori lint khusus (seperti `pedantic` atau `restriction`) menggunakan perintah ini:
+```bash
+cargo clippy -- -W clippy::pedantic
+```
+
+2. **Lint Clippy Paling Penting untuk Keamanan FFI**
+Clippy memiliki beberapa aturan (lint) bawaan yang sengaja dirancang untuk mengendus bahaya pada kode FFI. Berikut adalah lint yang wajib Anda perhatikan:
+
+**a. clippy::missing_safety_doc**
+- **Bahaya**: Anda membuat fungsi `unsafe fn` tanpa menulis dokumentasi yang menjelaskan syarat keamanannya (_Safety Contract_). Hal ini membuat pengembang lain rawan salah panggil dan memicu _crash_.
+- **Solusi**: Tulis blok komentar `/// # Safety` di atas fungsi.
+
+**b. clippy::not_unsafe_ptr_arg_deref**
+- **Bahaya**: Fungsi publik Anda menerima _raw pointer_ (`*const` atau `*mut`) dan langsung melakukan dereferensi di dalamnya tanpa memastikan apakah pointer itu valid atau tidak.
+- **Solusi**: Clippy akan memaksa Anda menandai fungsi tersebut sebagai `unsafe fn` agar pemanggil tahu ada risiko memori di sana.
+
+**c. clippy::invalid_utf8_in_unchecked**
+- **Bahaya**: Menggunakan fungsi seperti `CStr::from_ptr` secara ceroboh atau memaksakan konversi string biner C langsung ke string Rust tanpa validasi karakter UTF-8.
+
+3. **Mengonfigurasi Clippy Otomatis di `Cargo.toml`**
+Agar Anda tidak perlu mengetik perintah panjang setiap kali memeriksa kode, Anda bisa mengunci aturan-aturan ketat FFI ini langsung di dalam file `Cargo.toml` Anda pada bagian lints:
+```toml
+[lints.clippy]
+# Aktifkan peringatan jika fungsi unsafe tidak memiliki dokumentasi syarat aman
+missing_safety_doc = "warn"
+
+# Cegah dereferensi pointer yang tidak aman pada fungsi publik
+not_unsafe_ptr_arg_deref = "deny" # Mengubahnya jadi error (gagal build)
+
+# Menyalakan seluruh rekomendasi kode FFI dan optimasi tingkat lanjut
+pedantic = "warn"
+
+```
+
+4. **Contoh Praktis: Sebelum vs Sesudah Diperiksa Clippy**
+KODE YANG SALAH (Lolos `cargo check`, tapi memicu peringatan Clippy):
+``rust
+// Clippy akan protes: Fungsi ini publik dan mendereferensi pointer, 
+// tapi fungsinya tidak ditandai `unsafe` dan tidak punya dokumentasi keamanan!
+pub fn proses_data(ptr: *const c_char) {
+    let data = unsafe { *ptr }; 
+    println!("{}", data);
+}
+
+```
+KODE YANG BENAR (Disetujui oleh Clippy):
+```rust
+/// # Safety
+/// 
+/// Fungsi ini aman digunakan hanya jika `ptr` adalah pointer valid 
+/// yang menunjuk ke memori yang telah dialokasikan dengan benar.
+pub unsafe fn proses_data(ptr: *const c_char) {
+    if ptr.is_null() { return; }
+    let data = unsafe { *ptr };
+    println!("{}", data);
+}
+
+```
+
+<br>
+
+q-ai:
+Jika Anda ingin memperketat sistem deteksi otomatis ini lebih jauh, beri tahu saya jika Anda ingin mempelajari:
+- Cara mengintegrasikan `cargo clippy` ke dalam **GitHub Actions** atau sistem CI/CD untuk otomatisasi pengecekan kode.
+- Cara menggunakan perkakas analisis dinamis seperti *Miri* untuk mendeteksi _Undefined Behavior_ saat runtime.
+
+<br>
+
+q-c:
+Cara menggunakan perkakas analisis dinamis seperti *Miri* untuk mendeteksi _Undefined Behavior_ saat runtime.
+
+<br>
+
+a-ai:
+**Miri** adalah interpreter tingkat MIR (_Mid-level Intermediate Representation_) bawaan Rust yang mengeksekusi kode Anda baris demi baris di atas sebuah mesin abstrak virtual.
+
+Berbeda dengan kompiler biasa, Miri melacak metadata setiap byte memori secara dinamis untuk mendeteksi _Undefined Behavior_ (UB) saat runtime, seperti pelanggaran aturan _aliasing_ pointer (_Tree/Stacked Borrows_), pembacaan memori yang belum diinisialisasi, atau _use-after-free_.
+
+Berikut adalah panduan lengkap cara memasang, mengonfigurasi, dan menggunakan Miri pada proyek Anda:
+
+1. **Cara Pemasangan Miri**
+Miri membutuhkan kompiler Rust saluran **Nightly**. Jalankan perintah berikut di terminal Anda untuk menginstalnya:
+```bash
+# Tambahkan toolchain nightly
+rustup toolchain install nightly
+
+# Pasang komponen Miri ke dalam toolchain nightly
+rustup +nightly component add miri
+
+```
+
+2. **Cara Menjalankan Pemeriksaan Miri**:
+Miri mengevaluasi kode dengan cara mengeksekusi test suite atau biner aplikasi Anda.
+- **Menjalankan Seluruh Unit Test di Bawah Pengawasan Miri**:
+```bash
+cargo +nightly miri test
+```
+- **Menjalankan Unit Test Spesifik**:
+```bash
+cargo +nightly miri test -- nama_fungsi_test
+```
+- **Menjalankan Berkas Aplikasi Utama (`main.rs`)**:
+```bash
+cargo +nightly miri run
+```
+
+3. **Batasan Penting Terkait FFI & Solusinya**
+Secara bawaan, **Miri tidak bisa mengeksekusi pustaka luar atau fungsi C mentah** karena Miri tidak mengompilasi kode ke instruksi mesin asli. Saat Miri menemukan fungsi seperti `libc::opendir`, ia akan memicu eror _"unsupported foreign function"_.
+
+Namun, karena Anda telah menerapkan **pola arsitektur modular** sebelumnya (memisahkan fungsi FFI eksternal dengan logika bisnis internal yang aman), Anda bisa menguji logika inti Anda di Miri menggunakan strategi berikut:
+
+**Strategi A: Buat Mock / Isolasi Pengujian (Sangat Direkomendasikan)**
+Tulis sebuah unit test di dalam komponen logika bisnis Anda (`logic.rs`) yang mengevaluasi perilaku kode tanpa memanggil fungsi batasan FFI C:
+```rust
+// logic.rs
+pub fn batasi_akses_direktori(jalur: &str) -> Result<(), &'static str> {
+    if jalur.starts_with("/system/etc") {
+        return Err("Akses folder sistem dilarang!");
+    }
+    Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_validasi_jalur_aman() {
+        // Test ini 100% menggunakan kode Rust murni sehingga bisa divalidasi oleh Miri
+        assert!(batasi_akses_direktori("/data/user").is_ok());
+        assert!(batasi_akses_direktori("/system/etc/hosts").is_err());
+    }
+}
+
+```
+Ketika Anda mengeksekusi `cargo +nightly miri test`, Miri akan memeriksa apakah fungsi `batasi_akses_direktori` tidak sengaja melakukan pelanggaran memori tersembunyi.
+
+**Strategi B: Menggunakan Flag Isolasi untuk File I/O**
+Secara standar, Miri mengisolasi program dari sistem operasi (tidak boleh mengakses berkas atau jaringan asli komputer Anda). Jika kode Rust Anda membutuhkan pembacaan file asli, jalankan Miri dengan menonaktifkan fitur isolasi tersebut:
+```bash
+MIRIFLAGS="-Zmiri-disable-isolation" cargo +nightly miri test
+```
+
+4. **Cara Membaca Laporan Eror Miri**
+Jika Miri menemukan _Undefined Behavior_, ia akan langsung menghentikan eksekusi pengujian dan mencetak laporan kerusakan memori yang sangat detail.
+
+**Contoh Kasus Pelanggaran Aliasing (Stacked Borrows Violation):**
+```bash
+error: Undefined Behavior: attempting a read access using <2451> at alloc1108, 
+       but that tag does not exist in the borrow stack for this location
+  --> src/logic.rs:12:18
+   |
+12 |     let isi = *pointer_liar;
+   |               ^^^^^^^^^^^^^ attempting a read access using <2451>
+
+```
+- **Cara Membaca**: Laporan di atas memberi tahu bahwa pada berkas `logic.rs` baris ke-12, Anda mencoba membaca memori melalui `pointer_liar`. Namun, hak akses alamat memori tersebut sudah kedaluwarsa atau dimodifikasi oleh referensi lain (_aliasing violation_).
+
+Kesimpulan Alur Pengujian Terbaik
+Untuk memastikan kode FFI Anda bebas dari UB secara menyeluruh, kombinasikan dua perkakas ini:
+1. **Gunakan Miri** untuk menguji dan memastikan bahwa bagian internal logika Rust Anda mematuhi aturan kepemilikan memori (_aliasing_) yang ketat.
+2. **Gunakan Valgrind atau Sanitizers (ASan)** saat menjalankan pengujian biner utuh yang sudah digabungkan dengan pustaka C/Android asli untuk mendeteksi kebocoran memori lintas bahasa.
+
+<br>
+q-ai:
+
+Apakah Anda tertarik untuk membuat **skenario pengujian tiruan (mock test)** untuk merekayasa pointer C buatan di dalam Rust agar bisa dijalankan di bawah pengawasan Miri?
+
+<br>
+
+q-c:
+Saya tertarik untuk membuat **skenario pengujian tiruan (mock test)** untuk merekayasa pointer C buatan di dalam Rust agar bisa dijalankan di bawah pengawasan Miri?
+
+<br>
+
+a-ai:
+Untuk membuat _mock test_ yang kompatibel dengan Miri, kuncinya adalah **menghindari pemanggilan fungsi OS asli (seperti `libc::opendir`)**, namun tetap merekayasa alokasi memori string C (`*const c_char`) di dalam memori abstrak Rust [^3].
+
+Miri sangat pintar dalam melacak alokasi memori mentah, sehingga kita bisa membuat pointer C tiruan menggunakan CString Rust [^3].
+
+Berikut adalah panduan langkah demi langkah untuk merancang arsitektur pengujian tiruan yang aman dari _Undefined Behavior_ dan lolos uji Miri.
+
+1. **Desain Abstraksi FFI dengan Trait (Mocking System)**
+Agar fungsi FFI kita bisa diuji tanpa memanggil `libc` asli, kita buat sebuah _Trait_ yang mengabstraksi fungsi OS tersebut. Saat aplikasi berjalan normal, kita gunakan _system call_ asli. Saat pengujian (`test`), kita gunakan objek tiruan (mock).
+
+**Langkah A: Tentukan Interface (`os_interface.rs`)**
+```rust
+use std::os::raw::c_char;
+
+// Trait ini membungkus fungsi tidak aman (unsafe) milik OS
+pub trait OsDirectory {
+    unsafe fn opendir(&self, name: *const c_char) -> *mut libc::DIR;
+}
+
+// Implementasi asli untuk produksi (Akan memanggil libc asli)
+pub struct RealOs;
+impl OsDirectory for RealOs {
+    unsafe fn opendir(&self, name: *const c_char) -> *mut libc::DIR {
+        unsafe { libc::opendir(name) }
+    }
+}
+
+// Implementasi tiruan untuk pengujian di Miri
+pub struct MockOs;
+impl OsDirectory for MockOs {
+    unsafe fn opendir(&self, _name: *const c_char) -> *mut libc::DIR {
+        // Miri tidak bisa mengeksekusi libc::opendir asli.
+        // Di sini kita kembalikan pointer palsu yang valid secara sintaksis,
+        // atau sekadar pointer null tiruan untuk mensimulasikan hasil.
+        std::ptr::null_mut() 
+    }
+}
+
+```
+
+2. **Hubungkan Logika FFI dengan Trait Tersebut**
+Perbarui fungsi FFI luar Anda agar menerima objek OS ini (menggunakan _dependency injection_):
+```rust
+use std::ffi::CStr;
+use std::os::raw::c_char;
+use crate::os_interface::OsDirectory;
+
+// Fungsi internal yang menerima interface OS (bisa RealOs atau MockOs)
+pub unsafe fn internal_opendir<O: OsDirectory>(name: *const c_char, os: O) -> *mut libc::DIR {
+    // Gunakan aturan unsafe_op_in_unsafe_fn yang aman
+    let name_ptr = unsafe { name.as_ref() };
+    
+    if name_ptr.is_null() {
+        return unsafe { os.opendir(name) };
+    }
+
+    let c_str = unsafe { CStr::from_ptr(name) };
+    let jalur_rust = match c_str.to_str() {
+        Ok(teks) => teks,
+        Err(_) => return std::ptr::null_mut(),
+    };
+
+    // Panggil logika bisnis aman Anda
+    if crate::logic::batasi_akses_direktori(jalur_rust).is_err() {
+        return std::ptr::null_mut();
+    }
+
+    // Panggil opendir via trait abstraksi
+    unsafe { os.opendir(name) }
+}
+
+```
+
+3. **Menulis Unit Test Tiruan untuk Miri**
+Sekarang, kita bisa membuat pointer `*const c_char` buatan yang valid menggunakan `CString` [^3]. `CString` mengalokasikan array byte di memori dengan akhiran karakter null (`\0`) secara otomatis [^3]. Kita mengambil pointernya menggunakan `.as_ptr()` [^3].
+```rust
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::os_interface::MockOs;
+    use std::ffi::CString;
+
+    #[test]
+    fn test_ffi_dengan_pointer_buatan_valid() {
+        // 1. Buat string C tiruan di memori Rust
+        let string_tiruan = CString::new("/data/user/apps").unwrap(); // [^3]
+        
+        // 2. Ambil raw pointer mentahnya (*const c_char)
+        let pointer_c: *const c_char = string_tiruan.as_ptr(); // [^3]
+
+        // 3. Jalankan fungsi di bawah pengawasan Miri menggunakan MockOs
+        // Miri akan memeriksa apakah `internal_opendir` membaca `pointer_c` dengan aman
+        let hasil = unsafe { internal_opendir(pointer_c, MockOs) };
+
+        // Karena jalurnya aman ("/data/user/apps"), fungsi tidak mengembalikan null dari logika bisnis
+        assert!(hasil.is_null()); // MockOs mengembalikan null_mut(), jadi ini sukses
+    }
+
+    #[test]
+    fn test_ffi_memblokir_jalur_terlarang() {
+        // Skenario folder yang diblokir oleh logika bisnis
+        let string_terlarang = CString::new("/system/etc/hosts").unwrap(); // [^3]
+        let pointer_c = string_terlarang.as_ptr(); // [^3]
+
+        let hasil = unsafe { internal_opendir(pointer_c, MockOs) };
+
+        // Harus langsung mengembalikan NULL karena diblokir sebelum menyentuh MockOs
+        assert!(hasil.is_null());
+    }
+
+    #[test]
+    fn test_ffi_menangani_null_pointer() {
+        // Skenario pengujian jika C mengirimkan pointer NULL mentah
+        let pointer_null: *const c_char = std::ptr::null();
+
+        let hasil = unsafe { internal_opendir(pointer_null, MockOs) };
+        assert!(hasil.is_null());
+    }
+}
+
+```
+
+4. **Cara Menjalankan di Miri**
+Karena unit test di atas menggunakan `MockOs` dan tidak menyentuh pustaka eksternal sistem operasi, Miri dapat mengeksekusinya 100% tanpa kendala. Jalankan perintah:
+```bash
+cargo +nightly miri test
+```
+
+**Apa Saja yang Diperiksa Miri Saat Test Ini Berjalan?**
+- **Out-of-bounds Read**: Miri akan mendeteksi jika fungsi `CStr::from_ptr` membaca memori melintasi batas alokasi variabel `string_tiruan` Anda (misal jika karakter `\0` hilang).
+- **Use-after-free**: Jika Anda tidak sengaja menghapus `string_tiruan` sebelum menggunakan `pointer_c`, Miri akan langsung berteriak memberi tahu bahwa Anda mengakses memori yang sudah dibebaskan (_dangling pointer_).
+- **Data Race**: Jika Anda mencoba memasukkan skenario multi-threading di dalam test tersebut, Miri akan mendeteksi konflik akses memori.
+
+<br>
+
+q-ai:
+Jika Anda ingin memperluas simulasi ini, saya bisa membantu Anda membuat **mocking untuk arsitektur error JNI Android** jika pustaka FFI ini nantinya diakses dari Java/Kotlin melalui Android NDK. Apakah Anda berencana menghubungkannya dengan Java/Kotlin?
+
+<br>
+
+q-c:
+ya sangat tepat, Saya memang berencana menghubungkannya dengan Java/Kotlin?
+
+<br>
+
+a-ai:
+Menghubungkan Rust dengan Java/Kotlin di Android dilakukan melalui **JNI (Java Native Interface)** menggunakan pustaka standar NDK.
+
+Saat bekerja dengan JNI, tantangan memori menjadi dua kali lipat karena Anda harus mengelola aturan memori Rust sekaligus siklus hidup objek JVM (Java Virtual Machine). Berita baiknya, **Miri versi terbaru kini mendukung simulasi fungsi JNI dasar**, sehingga kita tetap bisa membuat _mock test_ yang aman di bawah pengawasan Miri sebelum dipasang ke Android Studio.
+
+Berikut adalah arsitektur lengkap untuk menghubungkan fungsi Anda ke Kotlin/Java menggunakan _crate_ `jni`, lengkap dengan simulasi pengujiannya.
+
+1. **Tambahkan Dependensi JNI di** `Cargo.toml`
+Perbarui file `Cargo.toml` Anda untuk menyertakan pustaka `jni` dengan fitur `invocation` (wajib agar Miri bisa membuat JVM tiruan di memori) [^4]:
+```toml
+[dependencies]
+# Gunakan versi jni terbaru yang stabil
+jni = { version = "0.21.1", features = ["invocation"] }
+
+```
+
+2. **Kode Implementasi Lapisan JNI (`jni_boundary.rs`)**
+Di Android, nama fungsi FFI Rust harus mengikuti aturan penamaan JNI yang ketat: `Java_Package_Name_ClassName_FunctionName`.
+
+Mari kita buat fungsi JNI yang menerima objek `String` dari Kotlin, memvalidasinya dengan logika bisnis aman kita, lalu mengembalikan nilai boolean ke Java.
+```rust
+use jni::JNIEnv;
+use jni::objects::{JClass, JString};
+use jni::sys::jboolean;
+
+// Nama fungsi harus sesuai dengan package & class di Kotlin/Java Anda
+// Contoh di Kotlin: package com.termux.adb; class NativeLib { external fun cekDirektori(path: String): Boolean }
+#[no_mangle]
+pub unsafe extern "C" fn Java_com_termux_adb_NativeLib_cekDirektori(
+    mut env: JNIEnv,
+    _class: JClass,
+    path_java: JString,
+) -> jboolean {
+    // 1. Ambil string aman dari Java (JNIEnv menangani validasi pointer internal)
+    let jalur_rust: String = match unsafe { env.get_string(&path_java) } {
+        Ok(jni_str) => jni_str.into(),
+        Err(_) => return jni::sys::JNI_FALSE, // Gagal membaca string Java
+    };
+
+    // 2. Panggil logika bisnis aman kita (dari logic.rs)
+    match crate::logic::batasi_akses_direktori(&jalur_rust) {
+        Ok(_) => jni::sys::JNI_TRUE,  // Akses diizinkan
+        Err(_) => jni::sys::JNI_FALSE, // Akses diblokir
+    }
+}
+
+```
+
+3. **Menulis Mock Test JNI untuk Miri**
+Agar Miri bisa menguji fungsi JNI di atas tanpa menyentuh ponsel Android atau emulator asli, kita menggunakan fitur `JavaVM::new` bawaan _crate_ `jni` untuk membuat **JVM tiruan di dalam memori internal komputer** [^4].
+```rust
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use jni::{InitArgsBuilder, JavaVM};
+
+    #[test]
+    fn test_jni_di_bawah_pengawasan_miri() {
+        // 1. Inisialisasi Java Virtual Machine tiruan di memori
+        let jvm_args = InitArgsBuilder::new()
+            .version(jni::JNIVersion::V8)
+            .build()
+            .unwrap();
+        
+        let jvm = JavaVM::new(jvm_args).unwrap();
+        let mut env = jvm.attach_current_thread().unwrap();
+
+        // 2. Simulasikan pembuatan objek String Java (seperti yang dikirim oleh Kotlin)
+        let jalur_aman_java = env.new_string("/data/user/0/com.termux").unwrap();
+        let class_palsu = JClass::from(std::ptr::null_mut()); // Class opsional untuk static method
+
+        // 3. Jalankan fungsi JNI di bawah pengawasan ketat Miri
+        let hasil_aman = unsafe {
+            Java_com_termux_adb_NativeLib_cekDirektori(
+                env.unsafe_clone(), 
+                class_palsu, 
+                jalur_aman_java
+            )
+        };
+        // Jalur aman harus mengembalikan nilai TRUE (1)
+        assert_eq!(hasil_aman, jni::sys::JNI_TRUE);
+
+        // 4. Skenario Uji Kedua: Jalur Terlarang
+        let jalur_terlarang_java = env.new_string("/system/etc/hosts").unwrap();
+        let hasil_terlarang = unsafe {
+            Java_com_termux_adb_NativeLib_cekDirektori(
+                env, 
+                class_palsu, 
+                jalur_terlarang_java
+            )
+        };
+        // Jalur sistem terlarang harus mengembalikan nilai FALSE (0)
+        assert_eq!(hasil_terlarang, jni::sys::JNI_FALSE);
+    }
+}
+
+```
+
+4. **Cara Eksekusi**
+Jalankan perintah Miri seperti biasa. Miri akan melacak apakah ada kebocoran referensi objek Java (_JNI Local Reference Leak_) atau kegagalan manajemen memori saat string dikonversi:
+```bash
+cargo +nightly miri test
+```
+
+**Kode Sisi Kotlin (Android Studio)**
+Setelah kode Rust Anda lolos uji Miri, Anda tinggal memuat file `.so` Anda di project Android Studio pada berkas Kotlin seperti ini:
+```kotlin
+package com.termux.adb
+
+class NativeLib {
+    // Memuat libtermuxadb_ffi.so yang telah dikompilasi silang
+    companion object {
+        init {
+            System.loadLibrary("termuxadb_ffi")
+        }
+    }
+
+    // Deklarasi fungsi eksternal yang terhubung ke Rust
+    external fun cekDirektori(path: String): Boolean
+}
+
+```
+
+<br>
+
+q-ai:
+Jika Anda ingin melanjutkan proses integrasi Android ini, beri tahu saya jika Anda memerlukan informasi mengenai:
+- Cara menangani **Exception Java dari dalam Rust** (misal: melempar `IOException` ke Kotlin jika logika Rust gagal).
+- Cara mengatur tata letak folder `jniLibs` di Android Studio agar file `.so` terbaca dengan benar di arsitektur `armeabi-v7a` dan `arm64-v8a`.
+
+<br>
+
+q-c:
+Cara menangani **Exception Java dari dalam Rust** (misal: melempar `IOException` ke Kotlin jika logika Rust gagal).
+
+<br>
+
+a-ai:
+Menangani _Exception_ Java/Kotlin dari dalam Rust memiliki aturan yang unik karena perilaku arsitekturnya. Ketika Anda memanggil perintah untuk melempar _exception_ di Rust via JNI, **eksekusi kode Rust tidak akan langsung berhenti** (tidak seperti kata kunci `throw` di Kotlin atau Java).
+
+Fungsi Rust akan terus berjalan hingga selesai, baru kemudian JVM akan mendeteksi dan melemparkan _exception_ tersebut saat kendali program kembali ke sisi Java/Kotlin.
+
+Oleh karena itu, pola terbaiknya adalah menggunakan metode `env.throw_new` dari _crate_ `jni`, diikuti dengan pengembalian nilai _default_ (seperti `0`, `false`, atau `null_mut`) untuk segera keluar dari fungsi Rust.
+
+1. **Implementasi Melempar `IOException` dari Rust**
+Berikut adalah cara memperbarui lapisan `jni_boundary.rs` Anda untuk menangkap error dari logika bisnis Rust, lalu menerjemahkannya menjadi `java.io.IOException` ke Kotlin:
+```rust
+use jni::JNIEnv;
+use jni::objects::{JClass, JString};
+use jni::sys::jboolean;
+
+#[no_mangle]
+pub unsafe extern "C" fn Java_com_termux_adb_NativeLib_cekDirektori(
+    mut env: JNIEnv,
+    _class: JClass,
+    path_java: JString,
+) -> jboolean {
+    // 1. Ambil string dari Java
+    let jalur_rust: String = match unsafe { env.get_string(&path_java) } {
+        Ok(jni_str) => jni_str.into(),
+        Err(_) => {
+            // Jika gagal membaca string, lempar NullPointerException ke Java
+            let _ = env.throw_new("java/lang/NullPointerException", "Path string Java tidak valid");
+            return jni::sys::JNI_FALSE; // Segera keluar dari Rust
+        }
+    };
+
+    // 2. Evaluasi Logika Bisnis Aman Rust
+    match crate::logic::batasi_akses_direktori(&jalur_rust) {
+        Ok(_) => jni::sys::JNI_TRUE, // Sukses, kembalikan True ke Kotlin
+        
+        Err(err_bisnis) => {
+            // FORMAT: "nama/package/NamaException"
+            let class_exception = "java/io/IOException";
+            let pesan_error = format!("Akses ditolak oleh Rust: {}", err_bisnis);
+
+            // 3. Daftarkan Exception ke JVM
+            // Gunakan `let _ =` karena kita hanya perlu memicu efek sampingnya ke JVM
+            let _ = env.throw_new(class_exception, pesan_error);
+
+            // 4. WAJIB: Kembalikan nilai default tiruan
+            // Nilai ini akan diabaikan oleh Kotlin karena JVM mendeteksi ada Exception yang tertunda
+            jni::sys::JNI_FALSE 
+        }
+    }
+}
+
+```
+
+2. **Cara Menangkap Exception di Sisi Kotlin**
+Di sisi Android/Kotlin, fungsi ini dapat dibungkus dalam blok `try-catch` standar seperti fungsi I/O Kotlin pada umumnya:
+```kotlin
+package com.termux.adb
+
+import java.io.IOException
+
+class NativeLib {
+    companion object {
+        init {
+            System.loadLibrary("termuxadb_ffi")
+        }
+    }
+
+    external fun cekDirektori(path: String): Boolean
+
+    // Fungsi wrapper pembantu agar kode Kotlin Anda lebih bersih
+    fun eksekusiAman(path: String) {
+        try {
+            val hasil = cekDirektori(path)
+            println("Direktori valid: $hasil")
+        } catch (e: IOException) {
+            // Exception yang dilempar dari Rust `env.throw_new` akan tertangkap di sini!
+            System.err.println("Gagal mengeksekusi native kode: ${e.message}")
+        } catch (e: NullPointerException) {
+            System.err.println("Argumen tidak boleh kosong: ${e.message}")
+        }
+    }
+}
+
+```
+
+3. **Simulasi Uji Coba Menggunakan Miri**
+Miri versi terbaru dapat memvalidasi alur pelemparan _exception_ ini dengan sangat baik. Miri akan memastikan bahwa pemanggilan `env.throw_new` tidak mengacaukan struktur memori lokal _JNI environment_.
+
+Tambahkan skenario uji ini di bagian `#[cfg(test)]` Anda:
+```rust
+#[test]
+fn test_jni_melempar_exception_di_miri() {
+    let jvm_args = jni::InitArgsBuilder::new().version(jni::JNIVersion::V8).build().unwrap();
+    let jvm = jni::JavaVM::new(jvm_args).unwrap();
+    let mut env = jvm.attach_current_thread().unwrap();
+
+    // Buat jalur terlarang untuk memicu error logika bisnis
+    let jalur_terlarang = env.new_string("/system/etc/hosts").unwrap();
+    let class_palsu = JClass::from(std::ptr::null_mut());
+
+    // Eksekusi fungsi JNI
+    let hasil = unsafe {
+        Java_com_termux_adb_NativeLib_cekDirektori(env.unsafe_clone(), class_palsu, jalur_terlarang)
+    };
+
+    assert_eq!(hasil, jni::sys::JNI_FALSE);
+
+    // Miri memverifikasi apakah ada exception yang tertunda di thread JVM saat ini
+    let ada_exception = env.exception_check().unwrap();
+    assert!(ada_exception, "Miri Mendeteksi: Harus ada Exception yang dilempar!");
+
+    // Bersihkan exception setelah diuji agar pengujian selanjutnya tidak terganggu
+    env.exception_clear().unwrap();
+}
+
+```
+
+<br>
+
+q-ai:
+Menghubungkan Rust dengan Kotlin melalui JNI sudah siap sepenuhnya. Jika Anda membutuhkan informasi mengenai penataan folder `jniLibs` (seperti pembuatan subfolder `arm64-v8a` dan `armeabi-v7a`) di proyek Android Studio Anda, beri tahu saya cara terbaik untuk melanjutkannya.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 <br>
 
