@@ -1994,7 +1994,7 @@ fn test_jni_melempar_exception_di_miri() {
 q-ai:
 Menghubungkan Rust dengan Kotlin melalui JNI sudah siap sepenuhnya. Jika Anda membutuhkan informasi mengenai penataan folder `jniLibs` (seperti pembuatan subfolder `arm64-v8a` dan `armeabi-v7a`) di proyek Android Studio Anda, beri tahu saya cara terbaik untuk melanjutkannya.
 
-
+Apakah program Anda ini nantinya akan dipanggil oleh kode program bertipe **C murni** atau dari bahasa lain seperti **Python/Node.js** melalui FFI?
 
 
 
